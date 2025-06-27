@@ -3,6 +3,9 @@ package com.kosta.domain.member;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "MEMBER")
 @NoArgsConstructor
@@ -47,4 +50,9 @@ public class Member {
   @Builder.Default
   @Column(name = "ROLE", length = 20)
   private String role = "ROLE_USER";
+  
+  @OneToMany(mappedBy = "member") //여기서 "member"는 MemberSocial의 필드이름
+  private List<MemberSocial> socialLinks = new ArrayList<>();
+  
+  
 }

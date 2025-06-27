@@ -32,6 +32,6 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
-src/main/resources/application-oauth2.properties
+**/application-oauth2.properties
 ### VS Code ###
 .vscode/

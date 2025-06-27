@@ -19,7 +19,7 @@ public class Member {
   @Column(name = "MEMBER_ID",nullable = false,length = 20)
   private String memberId;
   
-  @Column(name = "MEMBER_PASSWORD",length = 20)
+  @Column(name = "MEMBER_PASSWORD",length = 200)
   private String memberPassword;
   
   @Column(name = "MEMBER_NAME",length = 20)
@@ -40,9 +40,11 @@ public class Member {
   @Column(name = "MEMBER_ZIP",length = 5)
   private String memberZip;
   
-  @Column(name = "IS_ACTIVE", length = 1)
+  @Builder.Default
+  @Column(name = "IS_ACTIVE", length = 1,nullable = false)
   private String isActive = "Y";
   
-  @Column(name = "ROLE", length = 1)
-  private String role = "M";
+  @Builder.Default
+  @Column(name = "ROLE", length = 20)
+  private String role = "ROLE_USER";
 }

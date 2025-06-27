@@ -43,6 +43,7 @@ public class MemberController {
           .memberZip(memberDTO.getMemberZip())
           .build();
       
+      
       Member registeredMember = memberService.create(member);
       MemberDTO responseMemberDTO = MemberDTO.builder()
           .id(registeredMember.getId())

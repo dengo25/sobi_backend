@@ -1,13 +1,24 @@
 package com.kosta.domain.member;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "MEMBER")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class Member {
+  
   @Id
-  @Column(name = "MEMBER_ID",nullable = false,length = 20)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+  
+  @Column(name = "MEMBER_ID",nullable = false,length = 20)
   private String memberId;
   
   @Column(name = "MEMBER_PASSWORD",length = 20)

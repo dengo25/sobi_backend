@@ -1,10 +1,52 @@
 package com.kosta.domain.member;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "MEMBER")
+@Data
+@NoArgsConstructor
 public class Member {
-  @Id
-  private String id;
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
+    private Long id;
+    
+    @Column(name = "MEMBER_ID", nullable = false, unique = true, length = 20)
+    private String memberId;
+    
+    @Column(name = "MEMBER_PASSWORD", length = 20)
+    private String memberPassword;
+    
+    @Column(name = "MEMBER_NAME", length = 20)
+    private String memberName;
+    
+    @Column(name = "MEMBER_GENDER", length = 1)
+    private String memberGender;
+    
+    @Column(name = "MEMBER_EMAIL", length = 200)
+    private String memberEmail;
+    
+    @Column(name = "MEMBER_BIRTH", length = 6)
+    private String memberBirth;
+    
+    @Column(name = "MEMBER_ADDR", length = 50)
+    private String memberAddr;
+    
+    @Column(name = "MEMBER_ZIP", length = 5)
+    private String memberZip;
+    
+    @Column(name = "MEMBER_REG")
+    private LocalDateTime memberReg;
+    
+    @Column(name = "IS_ACTIVE", length = 1)
+    private String isActive = "Y";
+    
+    @Column(name = "ROLE", length = 1)
+    private String role = "M";
 }

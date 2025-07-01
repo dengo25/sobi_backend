@@ -1,5 +1,6 @@
-package com.kosta.domain.member;
+package com.kosta.domain.reivew;
 
+import com.kosta.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

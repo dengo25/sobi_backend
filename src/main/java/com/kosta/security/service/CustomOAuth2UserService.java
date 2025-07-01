@@ -20,39 +20,39 @@ import java.util.List;
 @Slf4j
 @Service
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
-  @Autowired
-  private MemberRepository memberRepository; //사용자 정보를 처리할 UserRepository 의존성 주입
-  
-  
-  //OAuth2 로그인 시 사용자의 정보를 가져와서 CustomUser 객체로 반환하는 메서드
-  @Override
-  public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-    log.info("loadUser");
-    
-    //OAuth2 사용자 정보 제공 서비스 생성
-    OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
-    OAuth2User oAuth2User = delegate.loadUser(userRequest); //사용자 정보 조회
-    
-    //클라이언트 등록 ID(google,naver,kakao 등)
-    String registrationId = userRequest.getClientRegistration().getRegistrationId();
-    
-    //사용자 식별을 위한 키 이름 (Oauth 제공자마다 다름)
-    String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails()
-        .getUserInfoEndpoint().getUserNameAttributeName();
-    
-    log.info("loadUser registrationId = " + registrationId);
-    log.info("loadUser userNameAttributeName = " + userNameAttributeName);
-    
-    //공급자로부터 받은 사용자 정보를 OAuthAttributes DTO로 매핑
-    OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
-    
-    String nameAttributeKey = attributes.getNameAttributeKey();
-    String name = attributes.getMemberName();
-    String email = attributes.getMemberEmail();
-    String picture = attributes.getProfileImage();
-    String id = attributes.getMemberId();
-    String socialType = "google";
-    
+	@Autowired
+	private MemberRepository memberRepository; // 사용자 정보를 처리할 UserRepository 의존성 주입
+
+	// OAuth2 로그인 시 사용자의 정보를 가져와서 CustomUser 객체로 반환하는 메서드
+	@Override
+	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+		log.info("loadUser");
+
+		// OAuth2 사용자 정보 제공 서비스 생성
+		OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
+		OAuth2User oAuth2User = delegate.loadUser(userRequest); // 사용자 정보 조회
+
+		// 클라이언트 등록 ID(google,naver,kakao 등)
+		String registrationId = userRequest.getClientRegistration().getRegistrationId();
+
+		// 사용자 식별을 위한 키 이름 (Oauth 제공자마다 다름)
+		String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint()
+				.getUserNameAttributeName();
+
+		log.info("loadUser registrationId = " + registrationId);
+		log.info("loadUser userNameAttributeName = " + userNameAttributeName);
+
+		// 공급자로부터 받은 사용자 정보를 OAuthAttributes DTO로 매핑
+		OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName,
+				oAuth2User.getAttributes());
+
+		String nameAttributeKey = attributes.getNameAttributeKey();
+		String name = attributes.getMemberName();
+		String email = attributes.getMemberEmail();
+		String picture = attributes.getProfileImage();
+		String id = attributes.getMemberId();
+		String socialType = "google";
+
 //    if("naver".equals(registrationId)) {
 //      socialType = "naver";
 //    }
@@ -74,54 +74,47 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 //    else {
 //      socialType = "google";
 //    }
-    
-    log.info("loadUser nameAttributeKey = " + nameAttributeKey);
-    log.info("loadUser id = " + id);
-    log.info("loadUser socialType = " + socialType);
-    log.info("loadUser name = " + name);
-    log.info("loadUser email = " + email);
-    log.info("loadUser attributes = " + attributes);
-    
-    //null 방지 처리
-    if(name == null) name = "";
-    if(email == null) email = "";
-    
-    
-    //권한 목록 생성(기본 권한 ROLE_USER 부여)
-    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
-    authorities.add(authority);
-    
-    String username = email; //사용자명으로 이메일 사용
-    String authProvider = socialType; //OAuth 제공자 정보
-    Member member = null; // 사용자 정보 저장 객체
-    
-    //사용자 정보가 db에 없으면 신규저장, 있으면 조회
-    if(!memberRepository.existsByMemberId(username)) {
-      member = Member.builder()
-          .memberId(username)
-          .memberEmail(email)
-          .build();
-      member = memberRepository.save(member); //Db에 저장
-    } else {
-      member = memberRepository.findByMemberId(username); //기존 사용자 조회
-    }
-    
-    log.info("Successfully pulled user info username {} authProvider {}", username, authProvider);
-    
-    //CustomUser객체 반환하여 SecurityContext에 등록되도록함
-    return new CustomMember(
-        member.getId(),
-        member.getMemberId(),
-        member.getMemberName(),
-        member.getMemberEmail(),
-        member.getRole(),
-        authorities,
-        attributes
-    );
-    
-  }
-  
+
+		log.info("loadUser nameAttributeKey = " + nameAttributeKey);
+		log.info("loadUser id = " + id);
+		log.info("loadUser socialType = " + socialType);
+		log.info("loadUser name = " + name);
+		log.info("loadUser email = " + email);
+		log.info("loadUser attributes = " + attributes);
+
+		// null 방지 처리
+		if (name == null)
+			name = "";
+		if (email == null)
+			email = "";
+
+		// 권한 목록 생성(기본 권한 ROLE_USER 부여)
+		List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+		SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
+		authorities.add(authority);
+
+		String username = email; // 사용자명으로 이메일 사용
+		String authProvider = socialType; // OAuth 제공자 정보
+		Member member = null; // 사용자 정보 저장 객체
+
+		// 사용자 정보가 db에 없으면 신규저장, 있으면 조회
+		if (!memberRepository.existsByMemberIdAndIsActive(username, "Y")) {
+			member = Member.builder().memberId(username).memberEmail(email).memberName(name) // 소셜 로그인 시 이름도 저장
+					.isActive("Y") // 명시적으로 활성 상태 설정
+					.build();
+			member = memberRepository.save(member); // Db에 저장
+		} else {
+			member = memberRepository.findByMemberIdAndIsActive(username, "Y"); // 기존 활성 사용자 조회
+		}
+
+		log.info("Successfully pulled user info username {} authProvider {}", username, authProvider);
+
+		// CustomUser객체 반환하여 SecurityContext에 등록되도록함
+		return new CustomMember(member.getId(), member.getMemberId(), member.getMemberName(), member.getMemberEmail(),
+				member.getRole(), authorities, attributes);
+
+	}
+
 //  private String getEmailFromGitHub(String accessToken) {
 //    String url = "https://api.github.com/user/emails"; //github 이메일 API
 //
@@ -148,5 +141,5 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 //
 //    return null;
 //  }
-  
+
 }

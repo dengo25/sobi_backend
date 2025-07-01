@@ -1,6 +1,5 @@
 package com.kosta.service.member;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,75 +12,85 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class MemberService {
-    
-    private final MemberRepository memberRepository;
-    private final ModelMapper modelMapper = new ModelMapper();
-    
-    // 회원 생성 (from member-ready branch)
-    public Member create(Member member) {
-        if (member == null || member.getMemberId() == null) {
-            throw new RuntimeException("Invalid Arguments");
-        }
-        
-        String memberId = member.getMemberId(); // 사용자명 추출
-        
-        // 같은 사용자가 있는지 확인
-        if (memberRepository.existsByMemberId(memberId)) {
-            throw new RuntimeException("Member Id already exists");
-        }
-        return memberRepository.save(member);
-    }
-    
-    // 인증 처리 (from member-ready branch)
-    public Member getByCredentials(String memberId, String password, PasswordEncoder encoder) {
-        Member originMember = memberRepository.findByMemberId(memberId);
-        
-        // 사용자 존재 및 비밀번호 일치 여부 확인
-        if (originMember != null && encoder.matches(password, originMember.getMemberPassword())) {
-            return originMember;
-        }
-        return null;
-    }
-    
-    // 회원 정보 조회 (from HEAD)
-    @Transactional(readOnly = true)
-    public MemberDTO getMemberInfo(String memberId) {
-        Member member = memberRepository.findByMemberIdAndIsActive(memberId, "Y")
-                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
-        
-        return modelMapper.map(member, MemberDTO.class);
-    }
-    
-    // 회원 정보 수정 (from HEAD)
-    public MemberDTO updateMemberInfo(String memberId, MemberDTO memberDTO) {
-        Member member = memberRepository.findByMemberIdAndIsActive(memberId, "Y")
-                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
-        
-        // 수정 가능한 필드들만 업데이트
-        if (memberDTO.getMemberName() != null) {
-            member.setMemberName(memberDTO.getMemberName());
-        }
-        if (memberDTO.getMemberEmail() != null) {
-            member.setMemberEmail(memberDTO.getMemberEmail());
-        }
-        if (memberDTO.getMemberGender() != null) {
-            member.setMemberGender(memberDTO.getMemberGender());
-        }
-        if (memberDTO.getMemberBirth() != null) {
-            member.setMemberBirth(memberDTO.getMemberBirth());
-        }
-        if (memberDTO.getMemberAddr() != null) {
-            member.setMemberAddr(memberDTO.getMemberAddr());
-        }
-        if (memberDTO.getMemberZip() != null) {
-            member.setMemberZip(memberDTO.getMemberZip());
-        }
-        
-        Member savedMember = memberRepository.save(member);
-        return modelMapper.map(savedMember, MemberDTO.class);
-    }
+
+	private final MemberRepository memberRepository;
+
+	public Member create(Member member) {
+		if (member == null || member.getMemberId() == null) {
+			throw new RuntimeException("Invalid Arguments");
+		}
+
+		String memberId = member.getMemberId(); // 사용자명 추출
+
+		// 같은 사용자가 있는지 확인
+		if (memberRepository.existsByMemberIdAndIsActive(memberId, "Y")) {
+			throw new RuntimeException("Member Id already exists");
+		}
+		return memberRepository.save(member);
+	}
+
+	public Member getByCredentials(String memberId, String password, PasswordEncoder encoder) {
+
+		// 활성 상태인 사용자만 조회
+		Member originMember = memberRepository.findByMemberIdAndIsActive(memberId, "Y");
+
+		// 사용자 존재 및 비밀번호 일치 여부 확인
+		if (originMember != null && encoder.matches(password, originMember.getMemberPassword())) {
+			return originMember;
+		}
+		return null;
+	}
+
+	// 마이페이지용 회원 조회
+	public Member getById(Long id) {
+		return memberRepository.findByIdAndIsActive(id, "Y").orElse(null);
+	}
+
+	// 회원 정보 수정 
+	public Member updateMember(Member existingMember, MemberDTO memberDTO, PasswordEncoder encoder) {
+		if (memberDTO.getMemberName() != null && !memberDTO.getMemberName().trim().isEmpty()) {
+			existingMember.setMemberName(memberDTO.getMemberName());
+		}
+
+		if (memberDTO.getMemberEmail() != null && !memberDTO.getMemberEmail().trim().isEmpty()) {
+			existingMember.setMemberEmail(memberDTO.getMemberEmail());
+		}
+
+		if (memberDTO.getMemberGender() != null && !memberDTO.getMemberGender().trim().isEmpty()) {
+			existingMember.setMemberGender(memberDTO.getMemberGender());
+		}
+
+		if (memberDTO.getMemberBirth() != null && !memberDTO.getMemberBirth().trim().isEmpty()) {
+			existingMember.setMemberBirth(memberDTO.getMemberBirth());
+		}
+
+		if (memberDTO.getMemberAddr() != null && !memberDTO.getMemberAddr().trim().isEmpty()) {
+			existingMember.setMemberAddr(memberDTO.getMemberAddr());
+		}
+
+		if (memberDTO.getMemberZip() != null && !memberDTO.getMemberZip().trim().isEmpty()) {
+			existingMember.setMemberZip(memberDTO.getMemberZip());
+		}
+
+		if (memberDTO.getPassword() != null && !memberDTO.getPassword().trim().isEmpty()) {
+			existingMember.setMemberPassword(encoder.encode(memberDTO.getPassword()));
+		}
+
+		return memberRepository.save(existingMember);
+	}
+
+	// 회원 탈퇴 메서드 - 논리적 삭제
+	public void deleteMember(Member member) {
+		log.info("논리적 삭제 처리: memberId = {}, id = {}", member.getMemberId(), member.getId());
+		
+		// 물리적 삭제 대신 isActive를 'N'으로 변경
+		member.setIsActive("N");
+		memberRepository.save(member);
+		
+		log.info("논리적 삭제 완료: memberId = {}", member.getMemberId());
+	}
 }

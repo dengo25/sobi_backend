@@ -25,5 +25,7 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, Review
   @EntityGraph(attributePaths = {"member", "category"})
   Page<Review> findAll(Pageable pageable); // 페이징까지 적용할 경우
   
-  Optional<Review> findById(Long rno);
+  //Optional<Review> findById(Long rno);
+  Optional<Review> findByRno(Long rno);
+  
 }

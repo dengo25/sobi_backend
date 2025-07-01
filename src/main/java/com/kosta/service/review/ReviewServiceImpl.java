@@ -22,7 +22,7 @@ public class ReviewServiceImpl implements ReviewService{
   
   @Override
   public ReviewDTO get(Long rno) {
-    Optional<Review> result = reviewRepository.findById(rno);
+    Optional<Review> result = reviewRepository.findByRno(rno);
     Review review = result.orElseThrow();
     return entityToDTO(review);
   }

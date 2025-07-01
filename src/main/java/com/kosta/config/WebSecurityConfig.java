@@ -57,7 +57,7 @@ public class WebSecurityConfig {
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //세션 사용 안 함 (JWT기반 인증)
         )
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/", "/auth/**","/review","/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
+            .requestMatchers("/", "/auth/**","/api/review/list","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .requestMatchers("/review/**").authenticated()
             .anyRequest().authenticated() //나머지 요청은 인증 필요
         )

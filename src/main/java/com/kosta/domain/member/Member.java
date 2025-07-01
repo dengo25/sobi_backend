@@ -53,6 +53,4 @@ public class Member {
   
   @OneToMany(mappedBy = "member") //여기서 "member"는 MemberSocial의 필드이름
   private List<MemberSocial> socialLinks = new ArrayList<>();
-  
-  
 }

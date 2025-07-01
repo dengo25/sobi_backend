@@ -10,10 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -39,8 +36,7 @@ public class MemberController {
           .memberName(memberDTO.getMemberName())
           .memberPassword(passwordEncoder.encode(memberDTO.getPassword()))
           .memberEmail(memberDTO.getMemberEmail())
-          .memberAddr(memberDTO.getMemberAddr())
-          .memberZip(memberDTO.getMemberZip())
+
           .build();
       
       
@@ -49,8 +45,6 @@ public class MemberController {
           .id(registeredMember.getId())
           .memberName(registeredMember.getMemberName())
           .memberEmail(registeredMember.getMemberEmail())
-          .memberAddr(registeredMember.getMemberAddr())
-          .memberZip(registeredMember.getMemberZip())
           .build();
       
       return ResponseEntity.ok().body(responseMemberDTO);
@@ -60,6 +54,30 @@ public class MemberController {
           .error(e.getMessage())
           .build();
       
+      return ResponseEntity.badRequest().body(responseDTO);
+    }
+  }
+  
+  @PostMapping("/login")
+  public ResponseEntity<?> authenticate(@RequestBody MemberDTO memberDTO) {
+    log.info("로그인 요청: {}", memberDTO);
+    Member member = memberService.getByCredentials(memberDTO.getMemberId(), memberDTO.getPassword(), passwordEncoder);
+    
+    if (member != null) {
+      String token = tokenProvider.create(member);
+      
+      MemberDTO responseMemberDTO = memberDTO.builder()
+          .memberName(member.getMemberName())
+          .memberId(member.getMemberId())
+          .token(token)
+          .build();
+      
+      return ResponseEntity.ok().body(responseMemberDTO);
+    }
+    else {
+      ResponseDTO responseDTO = ResponseDTO.builder()
+          .error("Login failed")
+          .build();
       return ResponseEntity.badRequest().body(responseDTO);
     }
   }

@@ -4,6 +4,7 @@ import com.kosta.domain.member.Member;
 import com.kosta.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,14 @@ public class MemberService {
   }
   
   
-//  public Member getByCredentials(String memberName, String password, PasswordEncoder encoder) {
-//
-//  }
+  public Member getByCredentials(String memberId, String password, PasswordEncoder encoder) {
+    
+    Member originMember = memberRepository.findByMemberId(memberId);
+    
+    //사용자 존재 및 비밀번호 일치 여부 확인
+    if (originMember != null && encoder.matches(password, originMember.getMemberPassword())) {
+      return originMember;
+    }
+    return null;
+  }
 }

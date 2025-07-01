@@ -92,22 +92,22 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
     authorities.add(authority);
     
-    String memberName = email; //사용자명으로 이메일 사용
+    String username = email; //사용자명으로 이메일 사용
     String authProvider = socialType; //OAuth 제공자 정보
     Member member = null; // 사용자 정보 저장 객체
     
     //사용자 정보가 db에 없으면 신규저장, 있으면 조회
-    if(!memberRepository.existsByMemberId(memberName)) {
+    if(!memberRepository.existsByMemberId(username)) {
       member = Member.builder()
-          .memberName(memberName)
+          .memberId(username)
           .memberEmail(email)
           .build();
       member = memberRepository.save(member); //Db에 저장
     } else {
-      member = memberRepository.findByMemberName(memberName); //기존 사용자 조회
+      member = memberRepository.findByMemberId(username); //기존 사용자 조회
     }
     
-    log.info("Successfully pulled user info memberName {} authProvider {}", memberName, authProvider);
+    log.info("Successfully pulled user info username {} authProvider {}", username, authProvider);
     
     //CustomUser객체 반환하여 SecurityContext에 등록되도록함
     return new CustomMember(

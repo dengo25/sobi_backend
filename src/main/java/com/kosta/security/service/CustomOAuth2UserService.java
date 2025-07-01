@@ -86,49 +86,27 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     if(name == null) name = "";
     if(email == null) email = "";
     
-//   //기존코드 
-//    //권한 목록 생성(기본 권한 ROLE_USER 부여)
-//    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-//    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
-//    authorities.add(authority);
-//    
-//    String username = email; //사용자명으로 이메일 사용
-//    String authProvider = socialType; //OAuth 제공자 정보
-//    Member member = null; // 사용자 정보 저장 객체
-//    
-//    //사용자 정보가 db에 없으면 신규저장, 있으면 조회
-//    if(!memberRepository.existsByMemberId(username)) {
-//      member = Member.builder()
-//          .memberId(username)
-//          .memberEmail(email)
-//          .build();
-//      member = memberRepository.save(member); //Db에 저장
-//    } else {
-//      member = memberRepository.findByMemberId(username); //기존 사용자 조회
-//    }
+   //기존코드 
+    //권한 목록 생성(기본 권한 ROLE_USER 부여)
+    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
+    authorities.add(authority);
     
-    //완빈 추가
-    String username = email; // 사용자명으로 이메일 사용
-    String authProvider = socialType;
-    Member member = null;
-
-    // 1. 사용자 정보가 없으면 새로 저장
+    String username = email; //사용자명으로 이메일 사용
+    String authProvider = socialType; //OAuth 제공자 정보
+    Member member = null; // 사용자 정보 저장 객체
+    
+    //사용자 정보가 db에 없으면 신규저장, 있으면 조회
     if(!memberRepository.existsByMemberId(username)) {
       member = Member.builder()
           .memberId(username)
           .memberEmail(email)
-          .memberName(name) // 이름도 저장하고자 한다면
-          .role("ROLE_USER") // 기본 권한 부여
           .build();
-      member = memberRepository.save(member);
+      member = memberRepository.save(member); //Db에 저장
     } else {
-      member = memberRepository.findByMemberId(username); // 기존 사용자 조회
-    }
-
-    // 2. 권한 목록 설정: DB에서 가져온 role 기반으로 설정
-    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-    authorities.add(new SimpleGrantedAuthority(member.getRole()));
-
+      member = memberRepository.findByMemberId(username); //기존 사용자 조회
+//    }
+    
     
     log.info("Successfully pulled user info username {} authProvider {}", username, authProvider);
     
@@ -171,5 +149,5 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 //
 //    return null;
 //  }
-  
+  }
 }

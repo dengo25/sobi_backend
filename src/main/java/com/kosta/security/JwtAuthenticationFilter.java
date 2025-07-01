@@ -71,29 +71,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String userId = tokenProvider.validateAndGetUserId(token); //토큰 검증 및 사용자 ID 추출
         log.info("Authenticated user ID : " + userId);
         
-//        //사용자 ID를 기반으로 인증 객체 생성(권한 없음)
-//        AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-//            userId, null, AuthorityUtils.NO_AUTHORITIES);
-        
-        //완빈 추가
-     // JWT에서 role 꺼내기
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey("FlRpX30pMqDbiAkmlfArbrmVkDD4RqISskGZmBFax5oGVxzXXWUzTR5JyskiHMIV9M1Oicegkpi46AdvrcX1E6CmTUBc6IFbTPiD".getBytes(StandardCharsets.UTF_8))
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        String role = claims.get("role", String.class); // 예: "ADMIN" 또는 "ROLE_ADMIN"
-
-        // "ROLE_" 접두어가 붙도록 강제
-        String authority = role.startsWith("ROLE_") ? role : "ROLE_" + role.toUpperCase();
-
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(authority));
-
-        // 인증 객체 생성
+        //사용자 ID를 기반으로 인증 객체 생성(권한 없음)
         AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            userId, null, authorities);
-
+            userId, null, AuthorityUtils.NO_AUTHORITIES);
         
         //요청 정보 추가(IP, 세션 등)
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

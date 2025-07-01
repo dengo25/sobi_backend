@@ -2,10 +2,7 @@ package com.kosta.domain.reivew;
 
 import com.kosta.domain.member.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Review {
   
   @Id
@@ -36,9 +34,6 @@ public class Review {
   
   @Column(name = "UPDATED_AT")
   private LocalDateTime updatedAt;
-  
-  @Column(name = "NOTICE_DELETE_DATE")
-  private LocalDateTime noticeDeleteDate;
   
   @Column(name = "IS_DELETED", length = 1)
   private String isDeleted;

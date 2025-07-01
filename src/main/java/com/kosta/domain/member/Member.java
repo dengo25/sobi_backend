@@ -3,6 +3,7 @@ package com.kosta.domain.member;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +44,9 @@ public class Member {
   @Column(name = "MEMBER_ZIP",length = 5)
   private String memberZip;
   
+  @Column(name = "MEMBER_REG", updatable = false)
+  private LocalDateTime memberReg;
+  
   @Builder.Default
   @Column(name = "IS_ACTIVE", length = 1,nullable = false)
   private String isActive = "Y";
@@ -52,7 +56,14 @@ public class Member {
   private String role = "ROLE_USER";
   
   @OneToMany(mappedBy = "member") //여기서 "member"는 MemberSocial의 필드이름
+  @Builder.Default
   private List<MemberSocial> socialLinks = new ArrayList<>();
   
   
+  @PrePersist
+  public void setMemberRegTime() {
+    if (this.memberReg == null) {
+      this.memberReg = LocalDateTime.now();
+    }
+  }
 }

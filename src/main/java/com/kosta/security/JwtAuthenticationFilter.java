@@ -22,7 +22,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
 import java.io.IOException;
+<<<<<<< HEAD
 import java.nio.charset.StandardCharsets;
+=======
+>>>>>>> refs/remotes/origin/member-ready
 import java.util.List;
 
 @Slf4j
@@ -69,11 +72,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       //토큰이 존재하고 "null"이 아닌 경우
       if (token != null && !token.equalsIgnoreCase("null")) {
         String userId = tokenProvider.validateAndGetUserId(token); //토큰 검증 및 사용자 ID 추출
+        String role = tokenProvider.getRoleFromToken(token);       // role 추출
+        
         log.info("Authenticated user ID : " + userId);
         
-        //사용자 ID를 기반으로 인증 객체 생성(권한 없음)
+        // role 기반 권한 생성
+        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        
+        
+        //사용자 ID를 기반으로 인증 객체 생성(권한 있음)
         AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            userId, null, AuthorityUtils.NO_AUTHORITIES);
+            userId, null, AuthorityUtils.createAuthorityList(role));
         
         //요청 정보 추가(IP, 세션 등)
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

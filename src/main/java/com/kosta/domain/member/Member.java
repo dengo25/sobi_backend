@@ -14,7 +14,14 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class Member {
+@ToString(exclude = {
+    "socialLinks", // Lazy 예외 방지
+    "memberGender",
+    "memberBirth",
+    "memberAddr",
+    "memberZip",
+    "memberPassword"
+})public class Member {
   
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

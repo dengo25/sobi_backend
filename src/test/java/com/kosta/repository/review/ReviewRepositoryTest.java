@@ -47,7 +47,7 @@ class ReviewRepositoryTest {
   
   @Test
   public void testInsertReviews() {
-    for (int i = 1; i <= 110; i++) {
+    for (Long i = 1L; i <= 110; i++) {
       Review review = Review.builder()
           .title("Test Review " + i)
           .content("Test Review Content " + i)

@@ -18,7 +18,7 @@ public class Review {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "REVIEW_ID")
-  private Integer rno;
+  private Long rno;
   
   @Column(name = "REVIEW_TITLE",length = 500)
   private String title;
@@ -28,7 +28,7 @@ public class Review {
   private String content;
   
   @Column(name = "REVIEW_IMAGE_NUMBER")
-  private Integer imageNumber;
+  private Long imageNumber;
   
   @Column(name = "CREATED_AT")
   private LocalDateTime createdAt;

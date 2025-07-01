@@ -1,8 +1,5 @@
 package com.kosta.dto.review;
 
-import com.kosta.domain.member.Member;
-import com.kosta.domain.reivew.Category;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,14 +13,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ReviewDTO {
   
-  private Integer id;
+  private Long tno;
   
   private String title;
   
   
   private String content;
   
-  private Integer imageNumber;
+  private Long imageNumber;
   
   private LocalDateTime createdAt;
   

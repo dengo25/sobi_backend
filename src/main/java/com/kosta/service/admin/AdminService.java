@@ -13,8 +13,12 @@ import lombok.RequiredArgsConstructor;
 public class AdminService {
 	private final AdminRepository adminRepository;
 	
-	public long getTodayMember() {
-		return adminRepository.getTodayJoinMember();
+	public long getTodayJoinMember() {
+		return adminRepository.countTodayJoinMembers();
+	}
+	
+	public long getMemberCount() {
+		return adminRepository.count();
 	}
 	
 }

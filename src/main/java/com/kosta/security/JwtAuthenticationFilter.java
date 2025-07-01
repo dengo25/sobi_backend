@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -16,7 +18,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -64,9 +71,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String userId = tokenProvider.validateAndGetUserId(token); //토큰 검증 및 사용자 ID 추출
         log.info("Authenticated user ID : " + userId);
         
-        //사용자 ID를 기반으로 인증 객체 생성(권한 없음)
+//        //사용자 ID를 기반으로 인증 객체 생성(권한 없음)
+//        AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+//            userId, null, AuthorityUtils.NO_AUTHORITIES);
+        
+        //완빈 추가
+     // JWT에서 role 꺼내기
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey("FlRpX30pMqDbiAkmlfArbrmVkDD4RqISskGZmBFax5oGVxzXXWUzTR5JyskiHMIV9M1Oicegkpi46AdvrcX1E6CmTUBc6IFbTPiD".getBytes(StandardCharsets.UTF_8))
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        String role = claims.get("role", String.class); // 예: "ADMIN" 또는 "ROLE_ADMIN"
+
+        // "ROLE_" 접두어가 붙도록 강제
+        String authority = role.startsWith("ROLE_") ? role : "ROLE_" + role.toUpperCase();
+
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(authority));
+
+        // 인증 객체 생성
         AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            userId, null, AuthorityUtils.NO_AUTHORITIES);
+            userId, null, authorities);
+
         
         //요청 정보 추가(IP, 세션 등)
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

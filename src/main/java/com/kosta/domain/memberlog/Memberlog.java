@@ -1,7 +1,6 @@
-package com.kosta.domain.blacklist;
+package com.kosta.domain.memberlog;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import com.kosta.domain.member.Member;
 
@@ -12,33 +11,36 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "BLACK_LIST")
 @Data
-public class Blacklist {
+@Table(name = "MEMBER_LOG")
+public class Memberlog {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int blackListNo;
+	private int logNo;
 	
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "MEMBER_ID")
 	private Member member;
 	
-	@Column(name = "UPDATE_AT")
-	private LocalDateTime updateAt;
+	@Column(name="ACCESSED_MENU", length=20)
+	private String accessedMenu;
 	
-	@Column(name = "STATUS", length = 20)
-	private String status = "BLOCKED";
+	@Column(name = "MEMBER_ACTION_TYPE", length = 20)
+	private String memberActionType;
+	
+	@Column(name = "MEBER_LOG_CREATED")
+	private LocalDateTime memberLogCreated;
 	
 	@PrePersist
-	public void setUpdateAt() {
-		if(this.updateAt == null) {
-			this.updateAt = LocalDateTime.now();
+	public void setLogCreated() {
+		if(this.memberLogCreated == null) {
+			this.memberLogCreated = LocalDateTime.now();
 		}
 	}
 }

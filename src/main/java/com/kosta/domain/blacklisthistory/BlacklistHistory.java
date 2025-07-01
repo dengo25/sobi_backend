@@ -1,6 +1,6 @@
 package com.kosta.domain.blacklisthistory;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import com.kosta.domain.blacklist.Blacklist;
 
@@ -12,12 +12,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Data
 @Table(name = "BLACKLIST_HISTORY")
+@Builder
 public class BlacklistHistory {
 	
 	@Id
@@ -34,8 +37,13 @@ public class BlacklistHistory {
 	@Column(name = "REPORT_TYPE", length = 100)
 	private String reportType;
 	
-//	@Column(name = "HISTORY_CREATED_AT", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
-//	private Date historyCreatedAt;
+	@Column(name = "HISTORY_CREATED_AT")
+	private LocalDateTime historyCreatedAt;
 	
-	
+	@PrePersist
+	public void setCreatedAt() {
+		if(this.historyCreatedAt == null) {
+			this.historyCreatedAt = LocalDateTime.now();
+		}
+	}
 }

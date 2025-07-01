@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -17,6 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -62,9 +64,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       //토큰이 존재하고 "null"이 아닌 경우
       if (token != null && !token.equalsIgnoreCase("null")) {
         String userId = tokenProvider.validateAndGetUserId(token); //토큰 검증 및 사용자 ID 추출
+        String role = tokenProvider.getRoleFromToken(token);       // role 추출
+        
         log.info("Authenticated user ID : " + userId);
         
-        //사용자 ID를 기반으로 인증 객체 생성(권한 없음)
+        // role 기반 권한 생성
+        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        
+        
+        //사용자 ID를 기반으로 인증 객체 생성(권한 있음)
         AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
             userId, null, AuthorityUtils.NO_AUTHORITIES);
         

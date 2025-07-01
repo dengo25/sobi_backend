@@ -74,7 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         //사용자 ID를 기반으로 인증 객체 생성(권한 있음)
         AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            userId, null, AuthorityUtils.NO_AUTHORITIES);
+            userId, null, AuthorityUtils.createAuthorityList(role));
         
         //요청 정보 추가(IP, 세션 등)
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

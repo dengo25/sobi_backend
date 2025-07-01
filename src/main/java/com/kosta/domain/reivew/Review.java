@@ -12,12 +12,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class Review {
   
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "REVIEW_ID")
-  private Integer id;
+  private Integer rno;
   
   @Column(name = "REVIEW_TITLE",length = 500)
   private String title;

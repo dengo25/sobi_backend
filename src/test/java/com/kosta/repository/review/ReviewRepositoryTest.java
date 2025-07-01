@@ -8,6 +8,10 @@ import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.PutMapping;
 
 import java.time.LocalDateTime;
@@ -43,10 +47,10 @@ class ReviewRepositoryTest {
   
   @Test
   public void testInsertReviews() {
-    for (int i = 1; i <= 10; i++) {
+    for (int i = 1; i <= 110; i++) {
       Review review = Review.builder()
           .title("Test Review " + i)
-          .content("This is test content for review " + i)
+          .content("Test Review Content " + i)
           .imageNumber(i)
           .confirmed("N")
           .isDeleted("N")
@@ -60,4 +64,14 @@ class ReviewRepositoryTest {
     }
   }
   
+  @Test
+  public void testPaging(){
+    Pageable pageable = PageRequest.of(0, 10, Sort.by("rno").descending());
+    Page<Review> result = reviewRepository.findAll(pageable);
+    
+    log.info(result.getTotalElements());
+    
+    //getCountent가 전체 내용물
+    result.getContent().stream().forEach(review -> log.info(review));
+  }
 }

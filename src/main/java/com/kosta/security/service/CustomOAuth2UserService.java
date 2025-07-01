@@ -86,7 +86,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     if(name == null) name = "";
     if(email == null) email = "";
     
-   //기존코드 
+    
     //권한 목록 생성(기본 권한 ROLE_USER 부여)
     List<SimpleGrantedAuthority> authorities = new ArrayList<>();
     SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
@@ -105,8 +105,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
       member = memberRepository.save(member); //Db에 저장
     } else {
       member = memberRepository.findByMemberId(username); //기존 사용자 조회
-//    }
-    
+    }
     
     log.info("Successfully pulled user info username {} authProvider {}", username, authProvider);
     
@@ -149,5 +148,5 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 //
 //    return null;
 //  }
-  }
+  
 }

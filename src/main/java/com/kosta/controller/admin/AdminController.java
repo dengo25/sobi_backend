@@ -18,7 +18,6 @@ public class AdminController {
 	
 	private final AdminService adminService;
 	
-	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/member/count")
 	public ResponseEntity<Long> getMemberCOunt(){
 		long count = adminService.getMemberCount();

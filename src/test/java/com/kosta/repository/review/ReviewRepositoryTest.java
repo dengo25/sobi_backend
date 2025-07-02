@@ -57,7 +57,7 @@ class ReviewRepositoryTest {
           .createdAt(LocalDateTime.now())
           .updatedAt(LocalDateTime.now())
           .member(Member.builder().id(1L).build()) //
-          .category(Category.builder().id(1).build()) //
+          .category(Category.builder().id(1L).build()) //
           .build();
       
       reviewRepository.save(review);

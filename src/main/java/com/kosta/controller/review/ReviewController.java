@@ -7,6 +7,7 @@ import com.kosta.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,4 +25,11 @@ public class ReviewController {
     
     return reviewService.getList(pageRequestDTO);
   }
+  
+  @GetMapping("/{tno}")
+  public ReviewDTO get(@PathVariable("tno") Long tno) {
+    return reviewService.get(tno);
+  }
+  
+  
 }

@@ -6,10 +6,7 @@ import com.kosta.service.community.FaqService;
 import com.kosta.dto.community.FaqDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,4 +24,15 @@ public class FaqController {
 		return faqService.getAllFaqs();
 	}
 
+	@PostMapping("")
+	public FaqDTO insert(@RequestBody FaqDTO dto){
+		log.info("FAQ 내용 등록");
+		return faqService.insertFaq(dto);
+	}
+
+	@DeleteMapping("/{faqNo}")
+	public void delete(@PathVariable int faqNo){
+		log.info("FAQ 내용 삭제");
+		faqService.deleteFaq(faqNo);
+	}
 }

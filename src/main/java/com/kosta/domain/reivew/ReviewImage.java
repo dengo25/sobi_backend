@@ -29,5 +29,7 @@ public class ReviewImage {
   
   @Column(name = "FILE_TYPE", nullable = false, length = 50)
   private String fileType;
-
+  
+  @Column(name = "IS_THUMBNAIL", length = 1)
+  private String isThumbnail; // 나중에 첫번쨰 이미지만 Y로 저장
 }

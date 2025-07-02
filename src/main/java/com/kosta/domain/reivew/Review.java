@@ -53,6 +53,7 @@ public class Review {
   private Category category;
   
   @OneToMany(mappedBy = "review", orphanRemoval = true)
+  @Builder.Default
   private List<ReviewImage> images = new ArrayList<>();
   
   // 저장 직전에 자동 실행

@@ -38,8 +38,13 @@ public class ReviewServiceImpl implements ReviewService{
   }
   
   @Override
-  public void modify(ReviewDTO dto) {
-  
+  public void modify(ReviewDTO dto) { //원래 엔티티를 가져와서 처리하기 떄문에 주의
+    Optional<Review> result = reviewRepository.findById(dto.getTno());
+    Review review = result.orElseThrow();
+    review.setTitle(dto.getTitle());
+    review.setContent(dto.getContent());
+    review.setImageNumber(dto.getImageNumber());
+    
   }
   
   @Override

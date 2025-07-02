@@ -20,4 +20,6 @@ public class ReviewImageDTO {
   private String originalFileName;
   
   private String fileType;
+  
+  private String isThumbnail;
 }

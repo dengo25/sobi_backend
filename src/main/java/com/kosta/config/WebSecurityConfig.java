@@ -43,7 +43,8 @@ public class WebSecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(
 						auth -> auth.requestMatchers("/", "/auth/login", "/auth/signup", "/review", "/review/detail/**")
-								.permitAll().requestMatchers("/auth/mypage").authenticated()
+								.permitAll().requestMatchers("/api/mypage", "/api/mypage/**").authenticated()
+								.requestMatchers("/api/messages", "/api/messages/**").authenticated()
 								.requestMatchers("/review/**").authenticated().anyRequest().authenticated())
 
 				.addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

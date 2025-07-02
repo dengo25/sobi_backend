@@ -1,0 +1,152 @@
+package com.kosta.controller.message;
+
+import com.kosta.dto.member.ResponseDTO;
+import com.kosta.dto.message.MessageDTO;
+import com.kosta.service.message.MessageService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/messages")
+@RequiredArgsConstructor
+public class MessageController {
+
+	private final MessageService messageService;
+
+	// 쪽지 전송
+	@PostMapping("/send")
+	public ResponseEntity<?> sendMessage(@AuthenticationPrincipal String userId, @RequestBody MessageDTO messageDTO) {
+		try {
+			log.info("쪽지 전송 요청: userId={}, messageDTO={}", userId, messageDTO);
+
+			if (userId == null || userId.trim().isEmpty()) {
+				log.error("userId가 null이거나 비어있음");
+				return ResponseEntity.badRequest().body(ResponseDTO.builder().error("사용자 인증 정보가 없습니다.").build());
+			}
+
+			MessageDTO sentMessage = messageService.sendMessage(messageDTO, Long.parseLong(userId));
+			return ResponseEntity.ok().body(sentMessage);
+
+		} catch (NumberFormatException e) {
+			log.error("userId 파싱 오류: {}", userId, e);
+			return ResponseEntity.badRequest().body(ResponseDTO.builder().error("잘못된 사용자 정보입니다.").build());
+		} catch (Exception e) {
+			log.error("쪽지 전송 오류: ", e);
+			ResponseDTO responseDTO = ResponseDTO.builder().error(e.getMessage()).build();
+			return ResponseEntity.badRequest().body(responseDTO);
+		}
+	}
+
+	// 받은 쪽지 목록 조회
+	@GetMapping("/received")
+	public ResponseEntity<?> getReceivedMessages(@AuthenticationPrincipal String userId) {
+		try {
+			log.info("받은 쪽지 목록 조회: userId={}", userId);
+
+			if (userId == null || userId.trim().isEmpty()) {
+				log.error("userId가 null이거나 비어있음");
+				return ResponseEntity.badRequest().body(ResponseDTO.builder().error("사용자 인증 정보가 없습니다.").build());
+			}
+
+			List<MessageDTO> messages = messageService.getReceivedMessages(Long.parseLong(userId));
+			return ResponseEntity.ok().body(messages);
+
+		} catch (NumberFormatException e) {
+			log.error("userId 파싱 오류: {}", userId, e);
+			return ResponseEntity.badRequest().body(ResponseDTO.builder().error("잘못된 사용자 정보입니다.").build());
+		} catch (Exception e) {
+			log.error("받은 쪽지 조회 오류: ", e);
+			ResponseDTO responseDTO = ResponseDTO.builder().error(e.getMessage()).build();
+			return ResponseEntity.badRequest().body(responseDTO);
+		}
+	}
+
+	// 쪽지 읽음 처리
+	@PatchMapping("/{messageId}/read")
+	public ResponseEntity<?> markAsRead(@AuthenticationPrincipal String userId, @PathVariable Integer messageId) {
+		try {
+			log.info("쪽지 읽음 처리: userId={}, messageId={}", userId, messageId);
+
+			if (userId == null || userId.trim().isEmpty()) {
+				return ResponseEntity.badRequest().body(ResponseDTO.builder().error("사용자 인증 정보가 없습니다.").build());
+			}
+
+			if (messageId == null) {
+				return ResponseEntity.badRequest().body(ResponseDTO.builder().error("쪽지 ID가 필요합니다.").build());
+			}
+
+			messageService.markAsRead(messageId, Long.parseLong(userId));
+
+			// 성공 응답 반환
+			ResponseDTO responseDTO = ResponseDTO.builder().error(null).build();
+			return ResponseEntity.ok().body(responseDTO);
+
+		} catch (NumberFormatException e) {
+			log.error("userId 파싱 오류: {}", userId, e);
+			return ResponseEntity.badRequest().body(ResponseDTO.builder().error("잘못된 사용자 정보입니다.").build());
+		} catch (Exception e) {
+			log.error("쪽지 읽음 처리 오류: ", e);
+			ResponseDTO responseDTO = ResponseDTO.builder().error(e.getMessage()).build();
+			return ResponseEntity.badRequest().body(responseDTO);
+		}
+	}
+
+	// 읽지 않은 쪽지 개수 조회
+	@GetMapping("/unread-count")
+	public ResponseEntity<?> getUnreadMessageCount(@AuthenticationPrincipal String userId) {
+		try {
+			log.info("읽지 않은 쪽지 개수 조회: userId={}", userId);
+
+			if (userId == null || userId.trim().isEmpty()) {
+				return ResponseEntity.badRequest().body(ResponseDTO.builder().error("사용자 인증 정보가 없습니다.").build());
+			}
+
+			long count = messageService.getUnreadMessageCount(Long.parseLong(userId));
+			return ResponseEntity.ok().body(count);
+
+		} catch (NumberFormatException e) {
+			log.error("userId 파싱 오류: {}", userId, e);
+			return ResponseEntity.badRequest().body(ResponseDTO.builder().error("잘못된 사용자 정보입니다.").build());
+		} catch (Exception e) {
+			log.error("읽지 않은 쪽지 개수 조회 오류: ", e);
+			ResponseDTO responseDTO = ResponseDTO.builder().error(e.getMessage()).build();
+			return ResponseEntity.badRequest().body(responseDTO);
+		}
+	}
+
+	// 쪽지 삭제 (수신자용)
+	@DeleteMapping("/{messageId}/receiver")
+	public ResponseEntity<?> deleteMessageByReceiver(@AuthenticationPrincipal String userId,
+			@PathVariable Integer messageId) {
+		try {
+			log.info("수신자 쪽지 삭제: userId={}, messageId={}", userId, messageId);
+
+			if (userId == null || userId.trim().isEmpty()) {
+				return ResponseEntity.badRequest().body(ResponseDTO.builder().error("사용자 인증 정보가 없습니다.").build());
+			}
+
+			if (messageId == null) {
+				return ResponseEntity.badRequest().body(ResponseDTO.builder().error("쪽지 ID가 필요합니다.").build());
+			}
+
+			messageService.deleteMessageByReceiver(messageId, Long.parseLong(userId));
+
+			ResponseDTO responseDTO = ResponseDTO.builder().error(null).build();
+			return ResponseEntity.ok().body(responseDTO);
+
+		} catch (NumberFormatException e) {
+			log.error("userId 파싱 오류: {}", userId, e);
+			return ResponseEntity.badRequest().body(ResponseDTO.builder().error("잘못된 사용자 정보입니다.").build());
+		} catch (Exception e) {
+			log.error("수신자 쪽지 삭제 오류: ", e);
+			ResponseDTO responseDTO = ResponseDTO.builder().error(e.getMessage()).build();
+			return ResponseEntity.badRequest().body(responseDTO);
+		}
+	}
+}

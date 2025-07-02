@@ -43,9 +43,20 @@ public class WebSecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(
 						auth -> auth.requestMatchers("/", "/auth/login", "/auth/signup", "/review", "/review/detail/**")
-								.permitAll().requestMatchers("/api/mypage", "/api/mypage/**").authenticated()
-								.requestMatchers("/api/messages", "/api/messages/**").authenticated()
-								.requestMatchers("/review/**").authenticated().anyRequest().authenticated())
+								.permitAll()
+								.requestMatchers("/api/mypage/**").authenticated()
+								.requestMatchers("/api/mypage").authenticated()
+								.requestMatchers("/api/messages/**").authenticated()
+								.requestMatchers("/api/messages").authenticated()
+								.requestMatchers("/api/messages/sent").authenticated()
+								.requestMatchers("/api/messages/received").authenticated()
+								.requestMatchers("/api/messages/send").authenticated()
+								.requestMatchers("/api/messages/unread-count").authenticated()
+								.requestMatchers("/api/messages/*/read").authenticated()
+								.requestMatchers("/api/messages/*/sender").authenticated()
+								.requestMatchers("/api/messages/*/receiver").authenticated()
+								.requestMatchers("/review/**").authenticated()
+								.anyRequest().authenticated())
 
 				.addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 

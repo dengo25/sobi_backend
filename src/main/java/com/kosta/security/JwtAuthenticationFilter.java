@@ -50,40 +50,62 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     4. 인증 정보를 바탕으로 SecurityContext에 설정
     5. 다음 필터로 요청을 넘김
   */
+//doFilterInternal 메서드의 시작 부분에 다음 로그들을 추가하세요:
+
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
-    
-    try {
-      String token = parseBearerToken(request); //Authorization 헤더에서 JWT 토큰 파싱
-      
-      log.info("doFilterInternal");
-      
-      //토큰이 존재하고 "null"이 아닌 경우
-      if (token != null && !token.equalsIgnoreCase("null")) {
-        String userId = tokenProvider.validateAndGetUserId(token); //토큰 검증 및 사용자 ID 추출
-        log.info("Authenticated user ID : " + userId);
-        
-        //사용자 ID를 기반으로 인증 객체 생성(권한 없음)
-        AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            userId, null, AuthorityUtils.NO_AUTHORITIES);
-        
-        //요청 정보 추가(IP, 세션 등)
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        
-        //새로운 SecurityContext 생성 및 인증 객체 설정
-        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-        securityContext.setAuthentication(authentication);
-        
-        //현재 쓰레드에 SecurityContext 등록
-        SecurityContextHolder.setContext(securityContext);
+
+      try {
+          // 요청 정보 로그
+          String requestURI = request.getRequestURI();
+          String method = request.getMethod();
+          
+          log.info("=== JWT 필터 처리 시작 ===");
+          log.info("Request URI: {}", requestURI);
+          log.info("Request Method: {}", method);
+          
+          String token = parseBearerToken(request);
+          log.info("토큰 존재 여부: {}", token != null ? "있음" : "없음");
+          
+          // 토큰이 존재하고 유효한 경우에만 인증 설정
+          if (token != null && !token.equalsIgnoreCase("null")) {
+              try {
+                  String userId = tokenProvider.validateAndGetUserId(token);
+                  log.info("토큰에서 추출된 사용자 ID: {}", userId);
+                  
+                  if (userId != null && !userId.isEmpty()) {
+                      // 사용자 ID를 기반으로 인증 객체 생성
+                      AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                          userId, null, AuthorityUtils.NO_AUTHORITIES);
+                      
+                      authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                      
+                      SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+                      securityContext.setAuthentication(authentication);
+                      SecurityContextHolder.setContext(securityContext);
+                      
+                      log.info("인증 설정 완료: userId = {}", userId);
+                  } else {
+                      log.warn("토큰에서 userId를 추출할 수 없음");
+                  }
+              } catch (Exception tokenEx) {
+                  log.error("토큰 처리 중 오류 발생: ", tokenEx);
+                  // 토큰 오류가 있어도 필터 체인을 계속 진행
+              }
+          } else {
+              log.info("토큰이 없음 - 인증 없이 진행");
+          }
+          
+          log.info("=== JWT 필터 처리 완료 ===");
+          
+      } catch (Exception ex) {
+          log.error("JWT 필터에서 예외 발생: ", ex);
+          // 예외가 발생해도 필터 체인을 계속 진행
       }
-    } catch (Exception ex) {
-      log.error("Could not set user authentication in security context", ex);
-    }
-    
-    //다음 필터로 요청 전달
-    filterChain.doFilter(request, response);
+      
+      // 다음 필터로 요청 전달
+      filterChain.doFilter(request, response);
   }
   
   

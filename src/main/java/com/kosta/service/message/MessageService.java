@@ -67,6 +67,17 @@ public class MessageService {
                 .collect(Collectors.toList());
     }
     
+    // 보낸 쪽지 목록 조회
+    public List<MessageDTO> getSentMessages(Long userId) {
+        Member user = memberRepository.findByIdAndIsActive(userId, "Y")
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        
+        List<Message> messages = messageRepository.findBySenderAndDeletedBySenderOrderBySendDateDesc(user, "N");
+        return messages.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    
     // 쪽지 읽음 처리
     public void markAsRead(Integer messageId, Long userId) {
         Message message = messageRepository.findById(messageId)
@@ -94,6 +105,20 @@ public class MessageService {
         message.setDeletedByReceiver("Y");
         messageRepository.save(message);
         log.info("수신자 쪽지 삭제: messageId={}", messageId);
+    }
+    
+    // 쪽지 삭제 (발신자용)
+    public void deleteMessageBySender(Integer messageId, Long userId) {
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new RuntimeException("쪽지를 찾을 수 없습니다."));
+        
+        if (!message.getSender().getId().equals(userId)) {
+            throw new RuntimeException("삭제 권한이 없습니다.");
+        }
+        
+        message.setDeletedBySender("Y");
+        messageRepository.save(message);
+        log.info("발신자 쪽지 삭제: messageId={}", messageId);
     }
     
     // 읽지 않은 쪽지 개수

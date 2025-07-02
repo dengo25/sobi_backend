@@ -27,12 +27,25 @@ public class ReviewServiceImpl implements ReviewService{
     return entityToDTO(review);
   }
   
+  
+  
   @Override
   public Long register(ReviewDTO rno) {
     
     Review review = dtoToEntity(rno);
     Review result = reviewRepository.save(review);
     return result.getRno();
+  }
+  
+  @Override
+  public void modify(ReviewDTO dto) {
+  
+  }
+  
+  @Override
+  public void remove(Long rno) {
+    reviewRepository.deleteById(rno);
+    
   }
   
   @Override
@@ -45,7 +58,8 @@ public class ReviewServiceImpl implements ReviewService{
     //review를 dto로 변경하고 컬렉션으로 묶는다.
     List<ReviewDTO> rnoList = result.get().map(review -> entityToDTO(review)).collect(Collectors.toList());
     
-    PageResponseDTO<ReviewDTO> responseDTO = PageResponseDTO.<ReviewDTO>withAll()
+    PageResponseDTO<ReviewDTO> responseDTO =
+        PageResponseDTO.<ReviewDTO>withAll() //BuilderMethod에서 정한 이름 WithAll
         .rnoList(rnoList)
         .pageRequestDTO(pageRequestDTO)
         .totalCount(result.getTotalElements())

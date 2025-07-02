@@ -1,10 +1,11 @@
 package com.kosta.domain.member;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "MEMBER")
@@ -12,7 +13,15 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Member {
+@Builder
+@ToString(exclude = {
+    "socialLinks", // Lazy 예외 방지
+    "memberGender",
+    "memberBirth",
+    "memberAddr",
+    "memberZip",
+    "memberPassword"
+})public class Member {
   
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +30,7 @@ public class Member {
   @Column(name = "MEMBER_ID",nullable = false,length = 20)
   private String memberId;
   
-  @Column(name = "MEMBER_PASSWORD",length = 20)
+  @Column(name = "MEMBER_PASSWORD",length = 200)
   private String memberPassword;
   
   @Column(name = "MEMBER_NAME",length = 20)
@@ -42,9 +51,26 @@ public class Member {
   @Column(name = "MEMBER_ZIP",length = 5)
   private String memberZip;
   
-  @Column(name = "IS_ACTIVE", length = 1)
+  @Column(name = "MEMBER_REG", updatable = false)
+  private LocalDateTime memberReg;
+  
+  @Builder.Default
+  @Column(name = "IS_ACTIVE", length = 1,nullable = false)
   private String isActive = "Y";
   
-  @Column(name = "ROLE", length = 1)
-  private String role = "M";
+  @Builder.Default
+  @Column(name = "ROLE", length = 20)
+  private String role = "ROLE_USER";
+  
+  @OneToMany(mappedBy = "member") //여기서 "member"는 MemberSocial의 필드이름
+  @Builder.Default
+  private List<MemberSocial> socialLinks = new ArrayList<>();
+  
+  
+  @PrePersist
+  public void setMemberRegTime() {
+    if (this.memberReg == null) {
+      this.memberReg = LocalDateTime.now();
+    }
+  }
 }

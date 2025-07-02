@@ -22,12 +22,6 @@ public class FaqDTO {
 	private	Date faqDelete;
 	private	String isDeleted;
 	private	String isVisible;
-	
-	
-//	public static Object builder() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
 }
 
 

@@ -30,6 +30,12 @@ public class FaqController {
 		return faqService.insertFaq(dto);
 	}
 
+	@PutMapping("/{faqNo}")
+	public FaqDTO update(@PathVariable FaqDTO dto){
+		log.info("FAQ 내용 수정");
+		return faqService.updateFaq(dto);
+	}
+
 	@DeleteMapping("/{faqNo}")
 	public void delete(@PathVariable int faqNo){
 		log.info("FAQ 내용 삭제");

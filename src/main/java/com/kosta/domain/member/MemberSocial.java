@@ -23,8 +23,8 @@ public class MemberSocial {
   @Column(name = "MEMBER_SOCIAL_ID")
   private String  memberSocialId;
   
+  @JoinColumn(name = "MEMBER_ID", referencedColumnName = "MEMBER_ID")
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "MEMBER_ID", unique = true)
   private Member member;
   
   @Column(name = "SOCIAL_TYPE",length = 20)

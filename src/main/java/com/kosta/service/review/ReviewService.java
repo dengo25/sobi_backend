@@ -13,7 +13,11 @@ public interface ReviewService {
   
   ReviewDTO get(Long rno);
   
-  Long register(ReviewDTO rno);
+  Long register(ReviewDTO dto);
+  
+  void modify(ReviewDTO dto);
+  
+  void remove(Long rno);
   
   PageResponseDTO<ReviewDTO> getList(PageRequestDTO pageRequestDTO);
   

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ReviewRepository extends JpaRepository<Review, Integer>, ReviewSearch {
+public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewSearch {
   
   Long rno(Long rno);//QueryDsl인 TodoSearch 상속
   

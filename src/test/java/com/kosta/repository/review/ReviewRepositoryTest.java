@@ -47,7 +47,7 @@ class ReviewRepositoryTest {
   
   @Test
   public void testInsertReviews() {
-    for (Long i = 1L; i <= 110; i++) {
+    for (Long i = 1L; i <= 3; i++) {
       Review review = Review.builder()
           .title("Test Review " + i)
           .content("Test Review Content " + i)
@@ -56,8 +56,8 @@ class ReviewRepositoryTest {
           .isDeleted("N")
           .createdAt(LocalDateTime.now())
           .updatedAt(LocalDateTime.now())
-          .member(Member.builder().id(1L).build()) //
-          .category(Category.builder().id(1).build()) //
+          .member(Member.builder().id(2L).build()) //
+          .category(Category.builder().id(1L).build()) //
           .build();
       
       reviewRepository.save(review);

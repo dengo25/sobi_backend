@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -33,6 +34,8 @@ public class ReviewDTO {
   // DTO를 만들 때 객체를 포함하지 않고 필요한 정보만 정의한다.
   private Long memberId;
   
-  private Integer categoryId;
+  private Long categoryId;
   
+  
+  private List<ReviewImageDTO> images;
 }

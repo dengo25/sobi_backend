@@ -37,7 +37,7 @@ public class TokenProvider {
     return Jwts.builder()
         .signWith(SIGNING_KEY, SignatureAlgorithm.HS512) //서명 알고리즘과 키 설정
         .setSubject(String.valueOf(member.getMemberId())) //사용자 ID를 subject로 설정
-        .claim("role", member.getRole()) //Oauth2 미 시용시 직접적으로 role 조회해서 넣어줘야한다.
+        //잠시 제거.claim("role", member.getRole()) //Oauth2 미 시용시 직접적으로 role 조회해서 넣어줘야한다.
         .setIssuer("sobi app") //토큰 발급자 정보 설정
         .setIssuedAt(new Date()) //토큰 발급 시간 설정
         .setExpiration(expiryDate) //만료 시간 설정

@@ -2,12 +2,20 @@ package com.kosta.controller.member;
 
 import com.kosta.domain.member.Member;
 import com.kosta.dto.member.MemberDTO;
+import com.kosta.dto.member.MemberInfoDto;
 import com.kosta.dto.member.ResponseDTO;
 import com.kosta.security.TokenProvider;
+import com.kosta.security.vo.CustomMember;
+import com.kosta.security.vo.CustomUserDetails;
 import com.kosta.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +30,8 @@ public class MemberController {
   private final TokenProvider tokenProvider; //JWT토큰 생성 유틸
   
   private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(); //비밀번호 암호화를 위한 인코더
+  
+
   
   @PostMapping("/signup")
   public ResponseEntity<?> registerUser(@RequestBody MemberDTO memberDTO) {

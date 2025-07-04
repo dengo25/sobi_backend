@@ -41,7 +41,6 @@ public class TokenProvider {
         .setIssuer("sobi app") //토큰 발급자 정보 설정
         .setIssuedAt(new Date()) //토큰 발급 시간 설정
         .setExpiration(expiryDate) //만료 시간 설정
-        .claim("role", member.getRole()) //[완빈]롤 추가
         .compact();
   }
   
@@ -92,7 +91,6 @@ public class TokenProvider {
         .setSubject(userPrincipal.getName())
         .setIssuedAt(new Date())
         .setExpiration(expiryDate)
-        .claim("role", userPrincipal.getRole())//[완빈] 롤 추가
         .signWith(SIGNING_KEY, SignatureAlgorithm.HS512)
         .compact();
   }

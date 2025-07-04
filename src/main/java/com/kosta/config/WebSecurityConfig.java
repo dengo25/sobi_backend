@@ -58,7 +58,7 @@ public class WebSecurityConfig {
         )
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/review/edit/**").authenticated()
-            .requestMatchers("/", "/auth/**","/api/review/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
+            .requestMatchers("/", "/auth/**","/api/review/**","/api/faq/**","/api/notice/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .anyRequest().authenticated() //나머지 요청은 인증 필요
         )
         

@@ -33,8 +33,8 @@ public class Faq {
     @Column(name = "FAQ_NO")
     private int faqNo;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "MEMBER_ID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MEMBER_ID", referencedColumnName = "MEMBER_ID")
     private Member member;
 
     @Column(name = "FAQ_CATEGORY", length = 20)

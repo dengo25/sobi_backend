@@ -59,6 +59,17 @@ public class WebSecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/review/edit/**").authenticated()
             .requestMatchers("/", "/auth/**","/api/review/**","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
+            .requestMatchers("/api/mypage/**").authenticated() // 마이페이지 인증 필요
+            .requestMatchers("/api/mypage").authenticated()
+            .requestMatchers("/api/messages/**").authenticated() // 쪽지 기능 인증 필요
+            .requestMatchers("/api/messages").authenticated()
+            .requestMatchers("/api/messages/sent").authenticated()
+            .requestMatchers("/api/messages/received").authenticated()
+            .requestMatchers("/api/messages/send").authenticated()
+            .requestMatchers("/api/messages/unread-count").authenticated()
+            .requestMatchers("/api/messages/*/read").authenticated()
+            .requestMatchers("/api/messages/*/sender").authenticated()
+            .requestMatchers("/api/messages/*/receiver").authenticated()
             .anyRequest().authenticated() //나머지 요청은 인증 필요
         )
         
@@ -89,7 +100,7 @@ public class WebSecurityConfig {
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowCredentials(true); //자격증명 포함 허용(ex: 쿠키, Authorication 헤더)
-    configuration.setAllowedOrigins(List.of("http://localhost:5174")); //허용할 프론트엔드 도메인
+    configuration.setAllowedOrigins(List.of("http://localhost:5173")); //허용할 프론트엔드 도메인
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")); //허용 메서드
     configuration.setAllowedHeaders(List.of("*")); //모든 요청 헤더 허용
     configuration.setExposedHeaders(List.of("*")); //응답 헤더 노출

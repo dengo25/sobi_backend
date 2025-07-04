@@ -1,16 +1,24 @@
 package com.kosta.repository.member;
 
 import com.kosta.domain.member.Member;
-import com.kosta.domain.reivew.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface MemberRepository extends JpaRepository<Member , Long> {
-  
-  Member findByMemberName(String memberEmail);
-  Member findByMemberId(String memberId);
-  boolean existsByMemberId(String memberId);
+public interface MemberRepository extends JpaRepository<Member, Long> {
+    
+    Member findByMemberName(String memberEmail);
+    
+    Member findByMemberId(String memberId);
+    
+    boolean existsByMemberId(String memberId);
+    
+    // 활성 사용자만 조회하는 메소드들 추가
+    Member findByMemberIdAndIsActive(String memberId, String isActive);
+    
+    boolean existsByMemberIdAndIsActive(String memberId, String isActive);
+    
+    Optional<Member> findByIdAndIsActive(Long id, String isActive);
 }

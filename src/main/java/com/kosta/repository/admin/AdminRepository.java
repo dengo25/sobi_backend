@@ -1,5 +1,7 @@
 package com.kosta.repository.admin;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,7 +20,11 @@ public interface AdminRepository extends JpaRepository<Member, Long> {
 	public long count();
 	
 	public Member findByMemberId(String memberId);
+	public List<Member> findByRole(String role);
 	
-	@Query("SELECT m.memberId FROM Member m WHERE m.id=:id")
-	public String findMemberIdById(Long id);
+	
+	
+	@Query("SELECT m.memberId FROM Member m WHERE m.memberId=:memberId")
+	public String findMemberIdByMemberId(String memberId);
+
 }

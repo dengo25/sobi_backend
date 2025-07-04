@@ -1,7 +1,6 @@
 package com.kosta.domain.blacklist;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import com.kosta.domain.member.Member;
 
@@ -26,7 +25,7 @@ public class Blacklist {
 	private int blackListNo;
 	
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "MEMBER_ID")
+	@JoinColumn(name = "MEMBER_ID", referencedColumnName = "MEMBER_ID")
 	private Member member;
 	
 	@Column(name = "UPDATE_AT")

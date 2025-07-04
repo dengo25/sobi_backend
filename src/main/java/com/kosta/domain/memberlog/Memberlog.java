@@ -25,7 +25,7 @@ public class Memberlog {
 	private int logNo;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "MEMBER_ID")
+	@JoinColumn(name = "MEMBER_ID", referencedColumnName = "MEMBER_ID")
 	private Member member;
 	
 	@Column(name="ACCESSED_MENU", length=20)

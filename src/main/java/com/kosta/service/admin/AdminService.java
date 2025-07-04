@@ -51,7 +51,7 @@ public class AdminService {
 	}
 	
 	public List<MemberListDto> memberListDto() {
-		List<Member> memberList = adminRepository.findAll();
+		List<Member> memberList = adminRepository.findByRole("ROLE_USER");
 		
 		return memberList.stream().map(member -> {
 			long reportCount = reportRepository.countByReportedId(member);

@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -49,6 +51,10 @@ public class Review {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "REVIEW_CATEGORY_ID")
   private Category category;
+  
+  @OneToMany(mappedBy = "review", orphanRemoval = true)
+  @Builder.Default
+  private List<ReviewImage> images = new ArrayList<>();
   
   // 저장 직전에 자동 실행
   @PrePersist

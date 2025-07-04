@@ -18,8 +18,10 @@ public class MemberSocial {
   
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+  
   @Column(name = "MEMBER_SOCIAL_ID")
-  private Long memberSocialId;
+  private String  memberSocialId;
   
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "MEMBER_ID")

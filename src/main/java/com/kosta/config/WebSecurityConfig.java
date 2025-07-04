@@ -60,16 +60,16 @@ public class WebSecurityConfig {
             .requestMatchers("/api/review/edit/**").authenticated()
             .requestMatchers("/", "/auth/**","/api/review/**","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .requestMatchers("/api/mypage/**").authenticated() // 마이페이지 인증 필요
-            .requestMatchers("/api/mypage").authenticated()
+//            .requestMatchers("/api/mypage").authenticated()
             .requestMatchers("/api/messages/**").authenticated() // 쪽지 기능 인증 필요
-            .requestMatchers("/api/messages").authenticated()
-            .requestMatchers("/api/messages/sent").authenticated()
-            .requestMatchers("/api/messages/received").authenticated()
-            .requestMatchers("/api/messages/send").authenticated()
-            .requestMatchers("/api/messages/unread-count").authenticated()
-            .requestMatchers("/api/messages/*/read").authenticated()
-            .requestMatchers("/api/messages/*/sender").authenticated()
-            .requestMatchers("/api/messages/*/receiver").authenticated()
+//            .requestMatchers("/api/messages").authenticated()
+//            .requestMatchers("/api/messages/sent").authenticated()
+//            .requestMatchers("/api/messages/received").authenticated()
+//            .requestMatchers("/api/messages/send").authenticated()
+//            .requestMatchers("/api/messages/unread-count").authenticated()
+//            .requestMatchers("/api/messages/*/read").authenticated()
+//            .requestMatchers("/api/messages/*/sender").authenticated()
+//            .requestMatchers("/api/messages/*/receiver").authenticated()
             .anyRequest().authenticated() //나머지 요청은 인증 필요
         )
         

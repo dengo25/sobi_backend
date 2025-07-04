@@ -112,4 +112,4 @@ public class WebSecurityConfig {
     return source;
   }
   
-}
+}            .requestMatchers("/", "/auth/**","/api/review/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용

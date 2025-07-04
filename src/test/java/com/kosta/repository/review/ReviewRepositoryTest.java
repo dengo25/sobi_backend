@@ -3,6 +3,7 @@ package com.kosta.repository.review;
 import com.kosta.domain.member.Member;
 import com.kosta.domain.reivew.Category;
 import com.kosta.domain.reivew.Review;
+import com.kosta.repository.member.MemberRepository;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,9 @@ class ReviewRepositoryTest {
   private ReviewRepository reviewRepository;
   
   @Autowired
+  private MemberRepository memberRepository;
+  
+  @Autowired
   private CategoryRepository categoryRepository;
   
   @Test
@@ -47,7 +51,10 @@ class ReviewRepositoryTest {
   
   @Test
   public void testInsertReviews() {
-    for (Long i = 1L; i <= 110; i++) {
+    Member member = memberRepository.findById(1L)
+        .orElseThrow(() -> new RuntimeException("Member not found"));
+    
+    for (Long i = 1L; i <= 113; i++) {
       Review review = Review.builder()
           .title("Test Review " + i)
           .content("Test Review Content " + i)
@@ -56,8 +63,8 @@ class ReviewRepositoryTest {
           .isDeleted("N")
           .createdAt(LocalDateTime.now())
           .updatedAt(LocalDateTime.now())
-          .member(Member.builder().id(1L).build()) //
-          .category(Category.builder().id(1L).build()) //
+          .member(member) // 진짜 영속 객체
+          .category(Category.builder().id(1L).build())
           .build();
       
       reviewRepository.save(review);

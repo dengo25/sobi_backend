@@ -13,11 +13,11 @@ import com.kosta.domain.member.Member;
 @Repository
 public interface AdminRepository extends JpaRepository<Member, Long> {
 
-	@Query("SELECT COUNT(m) FROM Member m WHERE DATE(m.memberReg) = CURRENT_DATE")
+	@Query("SELECT COUNT(m) FROM Member m WHERE DATE(m.memberReg) = CURRENT_DATE AND m.role = 'ROLE_USER'")
 	public long countTodayJoinMembers();
 	
 	//전체 회원 수
-	public long count();
+	public long countByRole(String role);
 	
 	public Member findByMemberId(String memberId);
 	public List<Member> findByRole(String role);

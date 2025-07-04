@@ -30,8 +30,9 @@ public class AdminService {
 	private final MemberLogRepository logRepository;
 	private final ReportRepository reportRepository;
 	
+	
 	public AdminMainPageDto getAdminStats() {
-		long totalMemberCount = adminRepository.count();
+		long totalMemberCount = adminRepository.countByRole("ROLE_USER");
 		long todayJoinCount = adminRepository.countTodayJoinMembers();
 		long blockedCount = blacklistRepository.countByStatus("BLOCKED");
 		long reviewCount = reviewRepository.count();

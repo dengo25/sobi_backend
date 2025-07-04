@@ -21,6 +21,9 @@ public interface ReviewService {
   
   PageResponseDTO<ReviewDTO> getList(PageRequestDTO pageRequestDTO);
   
+  // 현재 로그인한 사용자의 후기 목록 조회
+  PageResponseDTO<ReviewDTO> getMyReviews(Long memberId, PageRequestDTO pageRequestDTO);
+  
   default ReviewDTO entityToDTO(Review review) {
     if (review == null) return null;
     

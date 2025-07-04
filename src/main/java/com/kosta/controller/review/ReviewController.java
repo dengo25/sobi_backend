@@ -6,6 +6,7 @@ import com.kosta.dto.review.ReviewDTO;
 import com.kosta.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +32,13 @@ public class ReviewController {
     return reviewService.get(tno);
   }
   
-  
-  
-  
+  // 현재 로그인한 사용자의 후기 목록 조회
+  @GetMapping("/my-reviews")
+  public PageResponseDTO<ReviewDTO> getMyReviews(
+      @AuthenticationPrincipal String userId,
+      PageRequestDTO pageRequestDTO) {
+    log.info("getMyReviews - userId: " + userId + ", pageRequestDTO: " + pageRequestDTO);
+    
+    return reviewService.getMyReviews(Long.parseLong(userId), pageRequestDTO);
+  }
 }

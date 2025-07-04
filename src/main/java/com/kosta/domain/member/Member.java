@@ -27,12 +27,8 @@ public class Member {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  
-<<<<<<< HEAD
-  @Column(name = "MEMBER_ID", nullable = false, unique = true, length = 20)
-=======
+
   @Column(name = "MEMBER_ID", nullable = false, unique = true)
->>>>>>> 7ff4725808bb3cf3c15b619956ee3e649b0ba42c
   private String memberId;
   
   @Column(name = "MEMBER_PASSWORD", length = 200)

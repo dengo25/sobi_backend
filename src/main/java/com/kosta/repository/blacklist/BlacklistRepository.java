@@ -14,4 +14,5 @@ public interface BlacklistRepository extends JpaRepository<Blacklist, Integer> {
 	@Query("SELECT b FROM Blacklist b WHERE b.status = 'BLOCKED'")
 	public List<Blacklist> getBlockedMember();
 	
+	long countByStatus(String status);
 }

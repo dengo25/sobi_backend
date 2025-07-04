@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import com.kosta.domain.member.Member;
 
+
+
 @Repository
 public interface AdminRepository extends JpaRepository<Member, Long> {
 
@@ -14,4 +16,9 @@ public interface AdminRepository extends JpaRepository<Member, Long> {
 	
 	//전체 회원 수
 	public long count();
+	
+	public Member findByMemberId(String memberId);
+	
+	@Query("SELECT m.memberId FROM Member m WHERE m.id=:id")
+	public String findMemberIdById(Long id);
 }

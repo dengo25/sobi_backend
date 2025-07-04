@@ -20,4 +20,7 @@ public class BlacklistService {
 	public List<Blacklist> getBlockedMember(){
 		return blacklistRepository.getBlockedMember();
 	}
+	public Long getBlockedCount() {
+		return blacklistRepository.countByStatus("BLOCKED");
+	}
 }

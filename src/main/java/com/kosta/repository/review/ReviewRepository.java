@@ -1,5 +1,6 @@
 package com.kosta.repository.review;
 
+import com.kosta.domain.member.Member;
 import com.kosta.domain.reivew.Review;
 import com.kosta.service.search.ReviewSearch;
 import org.springframework.data.domain.Page;
@@ -27,5 +28,8 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, Review
   
   //Optional<Review> findById(Long rno);
   Optional<Review> findByRno(Long rno);
+
+  //완빈 추가
+  long countByMember(Member member);
   
 }

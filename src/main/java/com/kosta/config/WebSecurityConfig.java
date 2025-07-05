@@ -6,6 +6,8 @@ import com.kosta.security.RedirectUrlCookieFilter;
 import com.kosta.security.service.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,6 +23,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class WebSecurityConfig {
   
   /*  final 키워드는 불편객체로 설정
@@ -58,7 +61,16 @@ public class WebSecurityConfig {
         )
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/review/edit/**").authenticated()
-            .requestMatchers("/", "/auth/**","/api/review/**","/api/faq/**","/api/notice/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
+            .requestMatchers(HttpMethod.GET, "/api/faq").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/faq").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.PUT, "/api/faq/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/faq/**").hasRole("ADMIN")
+//          .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/notice").authenticated()
+            .requestMatchers(HttpMethod.PUT, "/api/notice/**").authenticated()
+            .requestMatchers(HttpMethod.DELETE, "/api/notice/**").authenticated()
+            .requestMatchers("/", "/auth/**","/api/review/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .requestMatchers("/", "/auth/**","/api/review/**","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .requestMatchers("/api/mypage/**").authenticated() // 마이페이지 인증 필요
             .requestMatchers("/api/messages/**").authenticated() // 쪽지 기능 인증 필요

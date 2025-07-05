@@ -1,9 +1,11 @@
 package com.kosta.service.community;
 
 import com.kosta.domain.community.Faq;
+import com.kosta.domain.member.Member;
 import com.kosta.dto.community.FaqDTO;
 import com.kosta.mapper.community.FaqMapper;
 import com.kosta.repository.community.FaqRepository;
+import com.kosta.repository.member.MemberRepository;
 import com.kosta.util.HtmlSanitizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import static com.kosta.mapper.community.FaqMapper.toEntity;
 @Transactional
 public class FaqServiceImpl implements FaqService{
     private final FaqRepository faqRepository;
+    private final MemberRepository memberRepository;
 
     public List<FaqDTO> getAllFaqs (){
         return faqRepository.findByIsVisible("Y").stream()
@@ -29,7 +32,15 @@ public class FaqServiceImpl implements FaqService{
     }
 
     public FaqDTO insertFaq(FaqDTO dto){
+        // Member 영속 객체 조회
+        Member member = memberRepository.findByMemberId(dto.getMemberId());
+
+        if(member == null){
+            throw new RuntimeException("존재하지 않는 회원 입니다!");
+        }
+
         Faq faq = toEntity(dto);
+        faq.setMember(member);
         faq.setFaqAnswer(HtmlSanitizer.strictSanitize(faq.getFaqAnswer()));
         faq.setFaqCreateDate(new Date());
         faq.setIsDeleted("N");

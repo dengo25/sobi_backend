@@ -47,8 +47,9 @@ public class FaqController {
 	}
 
 	@PutMapping("/{faqNo}")
-	public FaqDTO update(@PathVariable FaqDTO dto){
-		log.info("FAQ 내용 수정");
+	public FaqDTO update(@RequestBody FaqDTO dto, @PathVariable("faqNo") int faqNo, Principal principal, @AuthenticationPrincipal String memberId){
+		log.info("FAQ 내용 수정 요청: faqNo = {}, 사용자 = {}, 사용자 아이디={}", faqNo, principal.getName(), memberId);
+		dto.setFaqNo(faqNo); // 또는 필요시 dto에 FAQ 번호 설정
 		return faqService.updateFaq(dto);
 	}
 

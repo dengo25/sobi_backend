@@ -2,6 +2,8 @@ package com.kosta.service.admin;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.kosta.domain.member.Member;
@@ -50,7 +52,6 @@ public class AdminService {
 	public List<Member> findAll(){
 		return adminRepository.findAll();
 	}
-	
 	public List<MemberListDto> memberListDto() {
 		List<Member> memberList = adminRepository.findByRole("ROLE_USER");
 		

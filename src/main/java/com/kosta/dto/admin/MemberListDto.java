@@ -17,4 +17,5 @@ public class MemberListDto {
 	private LocalDateTime memberReg;
 	private long memberReviewCount;
 	private long memberReportCount;
+	
 }

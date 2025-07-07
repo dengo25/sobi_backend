@@ -41,6 +41,7 @@ public class MemberController {
       
       
       Member registeredMember = memberService.create(member);
+      
       MemberDTO responseMemberDTO = MemberDTO.builder()
           .id(registeredMember.getId())
           .memberName(registeredMember.getMemberName())
@@ -68,10 +69,14 @@ public class MemberController {
       
       MemberDTO responseMemberDTO = memberDTO.builder()
           .memberName(member.getMemberName())
+          .id(member.getId())
           .memberId(member.getMemberId())
+          .memberEmail(member.getMemberEmail())
           .token(token)
+          .role(member.getRole())
           .build();
       
+      log.info("로그인 응답 DTO: {}", responseMemberDTO);
       return ResponseEntity.ok().body(responseMemberDTO);
     }
     else {

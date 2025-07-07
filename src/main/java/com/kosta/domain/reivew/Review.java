@@ -45,7 +45,7 @@ public class Review {
   private String confirmed;
   
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "MEMBER_ID")
+  @JoinColumn(name = "MEMBER_ID", referencedColumnName = "MEMBER_ID")
   private Member member;
   
   @ManyToOne(fetch = FetchType.LAZY)

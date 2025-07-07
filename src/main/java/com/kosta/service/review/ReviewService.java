@@ -33,7 +33,7 @@ public interface ReviewService {
         .updatedAt(review.getUpdatedAt())
         .isDeleted(review.getIsDeleted())
         .confirmed(review.getConfirmed())
-        .memberId(review.getMember().getId())
+        .memberId(review.getMember().getMemberId())
         .categoryId(review.getCategory().getId())
         .build();
   }
@@ -42,7 +42,7 @@ public interface ReviewService {
     if (reviewDTO == null) return null;
     
     
-    Member member = Member.builder().id(reviewDTO.getMemberId()).build();
+    Member member = Member.builder().memberId(reviewDTO.getMemberId()).build();
     Category category = Category.builder().id(reviewDTO.getCategoryId()).build();
     
     return Review.builder()

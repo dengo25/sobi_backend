@@ -6,17 +6,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.kosta.domain.member.Member;
-import com.kosta.dto.admin.MemberListDto;
-
-
+import com.kosta.service.search.MemberSearch;
 
 @Repository
-public interface AdminRepository extends JpaRepository<Member, Long> {
-
+public interface AdminRepository extends JpaRepository<Member, Long>, MemberSearch {
+	
 	@Query("SELECT COUNT(m) FROM Member m WHERE DATE(m.memberReg) = CURRENT_DATE AND m.role = 'ROLE_USER'")
 	public long countTodayJoinMembers();
 	

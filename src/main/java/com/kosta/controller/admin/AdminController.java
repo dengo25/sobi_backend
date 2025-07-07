@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kosta.dto.admin.AdminMainPageDto;
 import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;
+import com.kosta.dto.admin.PageRequestDTO;
+import com.kosta.dto.admin.PageResponse;
 import com.kosta.dto.report.ReportDto;
 import com.kosta.service.admin.AdminService;
 import com.kosta.service.report.ReportService;
@@ -36,12 +39,19 @@ public class AdminController {
 		AdminMainPageDto stats = adminService.getAdminStats();
 		return ResponseEntity.ok(stats);
 	}
-	@GetMapping("/member")
-	public ResponseEntity<List<MemberListDto>> getMemberList(){
-		List<MemberListDto> memberList = adminService.memberListDto();
-		return ResponseEntity.ok(memberList);
-	}
 
+    @GetMapping("/member")
+    public Page<MemberListDto> getMemberList(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PageRequestDTO requestDTO = PageRequestDTO.builder()
+                .page(page)
+                .size(size)
+                .build();
+
+        return adminService.getMemberList(requestDTO);
+    }
 	@GetMapping("/member/{memberId}")
 	public ResponseEntity<MemberDetailDto> getMemberDetail(@PathVariable("memberId") String memberId){
 		MemberDetailDto memberDetailDto = adminService.memberDetailDto(memberId);

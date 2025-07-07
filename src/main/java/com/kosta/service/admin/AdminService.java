@@ -1,6 +1,7 @@
 package com.kosta.service.admin;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,8 +12,13 @@ import com.kosta.domain.memberlog.Memberlog;
 import com.kosta.dto.admin.AdminMainPageDto;
 import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;
+import com.kosta.dto.admin.PageRequestDTO;
+import com.kosta.dto.admin.PageResponse;
+import com.kosta.dto.admin.PageResponseDTO;
+import com.kosta.dto.review.ReviewDTO;
 import com.kosta.repository.admin.AdminRepository;
 import com.kosta.repository.blacklist.BlacklistRepository;
+import com.kosta.repository.member.MemberRepository;
 import com.kosta.repository.memberlog.MemberLogRepository;
 import com.kosta.repository.report.ReportRepository;
 import com.kosta.repository.review.ReviewRepository;
@@ -26,12 +32,13 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 @Data
 public class AdminService {
+
+    private final MemberRepository memberRepository;
 	private final AdminRepository adminRepository;
 	private final BlacklistRepository blacklistRepository;
 	private final ReviewRepository reviewRepository;
 	private final MemberLogRepository logRepository;
 	private final ReportRepository reportRepository;
-	
 	
 	public AdminMainPageDto getAdminStats() {
 		long totalMemberCount = adminRepository.countByRole("ROLE_USER");
@@ -52,23 +59,11 @@ public class AdminService {
 	public List<Member> findAll(){
 		return adminRepository.findAll();
 	}
-	public List<MemberListDto> memberListDto() {
-		List<Member> memberList = adminRepository.findByRole("ROLE_USER");
-		
-		return memberList.stream().map(member -> {
-			long reportCount = reportRepository.countByReportedId(member);
-			long reviewCount = reviewRepository.countByMember(member);
-			
-			return MemberListDto.builder()
-					.memberName(member.getMemberName())
-					.memberId(member.getMemberId())
-					.isActive(member.getIsActive())
-					.memberReg(member.getMemberReg())
-					.memberReviewCount(reviewCount)
-					.memberReportCount(reportCount)
-					.build();
-		}).toList();	
-	}
+	
+    public Page<MemberListDto> getMemberList(PageRequestDTO requestDTO) {
+        return adminRepository.searchMemberList(requestDTO);
+    }
+	
 	public MemberDetailDto memberDetailDto(String memberId) {
 		Member member = adminRepository.findByMemberId(memberId);
 		long reviewCount = reviewRepository.countByMember(member);

@@ -1,6 +1,9 @@
 package com.kosta.dto.admin;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.kosta.domain.reivew.Review;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,4 +22,5 @@ public class MemberDetailDto {
 	private String memberAddr;
 	private LocalDateTime memberReg;
 	private long memberReviewCount;
+	private List<Review> recentReviews;
 }

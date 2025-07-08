@@ -12,11 +12,15 @@ import com.kosta.domain.member.Member;
 import com.kosta.dto.admin.MemberListDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 
 
 @Repository
 public interface AdminRepository extends JpaRepository<Member, Long> {
     
+	Member findByMemberId(String memberId);
+	
     //role 사용자 수
     long countByRole(String role);
     

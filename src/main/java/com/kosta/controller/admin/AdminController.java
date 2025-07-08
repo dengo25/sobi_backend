@@ -10,15 +10,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.dto.admin.AdminMainPageDto;
+import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;
-import com.kosta.dto.admin.PagedMemberListDto;
 import com.kosta.service.admin.AdminService;
-import com.kosta.service.report.ReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +29,11 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminController {
     
     private final AdminService adminService;
- 
+    
+    @GetMapping("/member/{memberId}")
+    public ResponseEntity<MemberDetailDto> getMember(@PathVariable("memberId") String memberId) {
+        return ResponseEntity.ok(adminService.getMember(memberId));
+    }
     @GetMapping("/main")
     public ResponseEntity<AdminMainPageDto> adminStatus() {
     	AdminMainPageDto adminMainPageDto = adminService.getStatus();

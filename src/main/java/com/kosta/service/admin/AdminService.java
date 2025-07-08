@@ -1,28 +1,22 @@
 package com.kosta.service.admin;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kosta.domain.blacklist.Blacklist;
 import com.kosta.domain.member.Member;
-import com.kosta.domain.memberlog.Memberlog;
+import com.kosta.domain.reivew.Review;
 import com.kosta.dto.admin.AdminMainPageDto;
+import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;
-import com.kosta.dto.admin.PagedMemberListDto;
 import com.kosta.repository.admin.AdminRepository;
 import com.kosta.repository.admin.AdminReviewRepository;
 import com.kosta.repository.blacklist.BlacklistRepository;
-import com.kosta.repository.member.MemberRepository;
-import com.kosta.repository.memberlog.MemberLogRepository;
 import com.kosta.repository.report.ReportRepository;
-import com.kosta.repository.review.ReviewRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,20 +30,35 @@ public class AdminService {
     private final AdminReviewRepository adminReviewRepository;
     private final ReportRepository reportRepository;
     private final BlacklistRepository blacklistRepository;
-    private final MemberLogRepository memberlogRespository;
+    
+    public MemberDetailDto getMember(String memberId) {
+    	Member member = adminRepository.findByMemberId(memberId);
+    	List<Review> recentReviews = adminReviewRepository.findTop5ByMemberOrderByCreatedAtDesc(member);
+    	long memberReviewCount = adminReviewRepository.countByMemberAndIsDeleted(member,"N");
+    	return MemberDetailDto.builder()
+    			.memberName(member.getMemberName())
+    			.memberId(member.getMemberId())
+    			.memberGender(member.getMemberGender())
+    			.memberEmail(member.getMemberEmail())
+    			.memberAddr(member.getMemberAddr())
+    			.memberReg(member.getMemberReg())
+    			.memberReviewCount(memberReviewCount)
+    			.recentReviews(recentReviews)
+    			.build();
+    }
     
     public AdminMainPageDto getStatus() {
     	long totlaMemberCount = adminRepository.countByRole("ROLE_USER");
     	long blockedCount = blacklistRepository.countByStatus("BLOCKED");
     	long reviewCount = adminReviewRepository.countByIsDeleted("N");
-    	List<Memberlog> memberlogList = memberlogRespository.findAll();
+    	List<Blacklist> blacklist = blacklistRepository.getBlockedMember();
     	long unSolvedReportCount = reportRepository.countByStatus("PENDING");
     	
     	return AdminMainPageDto.builder()
     			.totalMemberCount(totlaMemberCount)
     			.blockedCount(blockedCount)
     			.reviewCount(reviewCount)
-    			.memberlogs(memberlogList)
+    			.blacklist(blacklist)
     			.unSolvedReportCount(unSolvedReportCount)
     			.build();
     }

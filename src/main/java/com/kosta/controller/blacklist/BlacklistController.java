@@ -1,10 +1,13 @@
 package com.kosta.controller.blacklist;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kosta.domain.blacklist.Blacklist;
 import com.kosta.service.blacklist.BlacklistService;
 
 import lombok.RequiredArgsConstructor;
@@ -15,11 +18,5 @@ import lombok.RequiredArgsConstructor;
 public class BlacklistController {
 
 	private final BlacklistService blacklistService;
-	
-	@GetMapping("/blacklist/blockedCount")
-	public ResponseEntity<Long> blacklistCount(){
-		long count = blacklistService.getBlockedCount();
-		return ResponseEntity.ok(count);
-	}
 	
 }

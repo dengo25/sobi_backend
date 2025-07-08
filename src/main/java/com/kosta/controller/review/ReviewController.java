@@ -39,8 +39,8 @@ public class ReviewController {
     return reviewService.get(tno);
   }
   
-  // 현재 로그인한 사용자의 후기 목록 조회
-  @GetMapping("/my-reviews")
+  // 현재 로그인한 사용자의 후기 목록 조회 - URL 경로 수정
+  @GetMapping("/review/my-reviews")
   public PageResponseDTO<ReviewDTO> getMyReviews(
       @AuthenticationPrincipal String userId,
       PageRequestDTO pageRequestDTO) {

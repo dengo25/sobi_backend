@@ -62,7 +62,6 @@ public class WebSecurityConfig {
             .requestMatchers("/", "/auth/**","/api/review/**","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .requestMatchers("/api/mypage/**").authenticated() // 마이페이지 인증 필요
             .requestMatchers("/api/messages/**").authenticated() // 쪽지 기능 인증 필요
-            .requestMatchers("/", "/auth/**","/api/review/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .anyRequest().authenticated() //나머지 요청은 인증 필요
         )
         
@@ -104,5 +103,4 @@ public class WebSecurityConfig {
     source.registerCorsConfiguration("/**", configuration); //모든 요청에 대해 설정 적용
     return source;
   }
-  
 }

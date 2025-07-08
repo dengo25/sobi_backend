@@ -45,14 +45,14 @@ public class Review {
   private String confirmed;
   
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "MEMBER_ID")
+  @JoinColumn(name = "MEMBER_ID", referencedColumnName = "MEMBER_ID")
   private Member member;
   
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "REVIEW_CATEGORY_ID")
   private Category category;
   
-  @OneToMany(mappedBy = "review", orphanRemoval = true)
+  @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
   private List<ReviewImage> images = new ArrayList<>();
   

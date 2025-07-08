@@ -55,7 +55,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
-    
+    log.info("--------------JwtAuthenticationFilter---------------");
+    log.info("Request URI: {}", request.getRequestURI());
+    log.info("Authorization Header: {}", request.getHeader("Authorization"));
     try {
       String token = parseBearerToken(request); //Authorization 헤더에서 JWT 토큰 파싱
       

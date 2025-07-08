@@ -6,7 +6,10 @@ import com.kosta.domain.reivew.Review;
 import com.kosta.dto.review.PageRequestDTO;
 import com.kosta.dto.review.PageResponseDTO;
 import com.kosta.dto.review.ReviewDTO;
+import com.kosta.dto.review.ReviewImageDTO;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Transactional
 public interface ReviewService {
@@ -27,6 +30,21 @@ public interface ReviewService {
   default ReviewDTO entityToDTO(Review review) {
     if (review == null) return null;
     
+    // ReviewImage → ReviewImageDTO 변환
+    List<ReviewImageDTO> imageDTOs = null;
+    if (review.getImages() != null && !review.getImages().isEmpty()) {
+      imageDTOs = review.getImages().stream()
+          .map(img -> ReviewImageDTO.builder()
+              .ino(img.getIno())
+              .reviewId(review.getRno()) // 리뷰 ID도 설정
+              .fileUrl(img.getFileUrl())
+              .originalFileName(img.getOriginalFileName())
+              .fileType(img.getFileType())
+              .isThumbnail(img.getIsThumbnail())
+              .build())
+          .toList();
+    }
+    
     return ReviewDTO.builder()
         .tno(review.getRno())
         .title(review.getTitle())
@@ -36,8 +54,9 @@ public interface ReviewService {
         .updatedAt(review.getUpdatedAt())
         .isDeleted(review.getIsDeleted())
         .confirmed(review.getConfirmed())
-        .memberId(review.getMember().getId())
+        .memberId(review.getMember().getMemberId())
         .categoryId(review.getCategory().getId())
+        .images(imageDTOs) // 전체 이미지 리스트 포함
         .build();
   }
   
@@ -45,7 +64,7 @@ public interface ReviewService {
     if (reviewDTO == null) return null;
     
     
-    Member member = Member.builder().id(reviewDTO.getMemberId()).build();
+    Member member = Member.builder().memberId(reviewDTO.getMemberId()).build();
     Category category = Category.builder().id(reviewDTO.getCategoryId()).build();
     
     return Review.builder()

@@ -52,7 +52,7 @@ public class Review {
   @JoinColumn(name = "REVIEW_CATEGORY_ID")
   private Category category;
   
-  @OneToMany(mappedBy = "review", orphanRemoval = true)
+  @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
   private List<ReviewImage> images = new ArrayList<>();
   

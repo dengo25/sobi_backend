@@ -26,6 +26,9 @@ public class ReviewSearchImpl extends QuerydslRepositorySupport implements Revie
     
     //아래 상태에서 조건도, 페이징도 없다
     JPQLQuery<Review> query = from(review); //상속을 받았기 때문에 from을 이용해서 뽑아낸다
+    query.leftJoin(review.images).fetchJoin();  // 이미지 연관
+    query.leftJoin(review.member).fetchJoin();  // 작성자 연관
+    query.select(review).distinct();            // 중복 제거
     
     //Spring Data의 PageRequest를 이용해서 페이징 정보생성
     Pageable pageable = PageRequest.of(

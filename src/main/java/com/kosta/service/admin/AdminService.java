@@ -1,82 +1,78 @@
 package com.kosta.service.admin;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.kosta.domain.member.Member;
 import com.kosta.domain.memberlog.Memberlog;
 import com.kosta.dto.admin.AdminMainPageDto;
-import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;
-import com.kosta.dto.admin.PageRequestDTO;
-import com.kosta.dto.admin.PageResponse;
-import com.kosta.dto.admin.PageResponseDTO;
-import com.kosta.dto.review.ReviewDTO;
+import com.kosta.dto.admin.PagedMemberListDto;
 import com.kosta.repository.admin.AdminRepository;
+import com.kosta.repository.admin.AdminReviewRepository;
 import com.kosta.repository.blacklist.BlacklistRepository;
 import com.kosta.repository.member.MemberRepository;
 import com.kosta.repository.memberlog.MemberLogRepository;
 import com.kosta.repository.report.ReportRepository;
 import com.kosta.repository.review.ReviewRepository;
 
-import jakarta.transaction.Transactional;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
-@Data
+@Transactional(readOnly = true)
+@Slf4j
 public class AdminService {
-
-    private final MemberRepository memberRepository;
 	private final AdminRepository adminRepository;
-	private final BlacklistRepository blacklistRepository;
-	private final ReviewRepository reviewRepository;
-	private final MemberLogRepository logRepository;
-	private final ReportRepository reportRepository;
-	
-	public AdminMainPageDto getAdminStats() {
-		long totalMemberCount = adminRepository.countByRole("ROLE_USER");
-		long todayJoinCount = adminRepository.countTodayJoinMembers();
-		long blockedCount = blacklistRepository.countByStatus("BLOCKED");
-		long reviewCount = reviewRepository.count();
-		List<Memberlog> memberlogs = logRepository.findAll();
-		long unSolvedReportCount = reportRepository.countByStatus("PENDING");
-		return AdminMainPageDto.builder()
-				.totalMemberCount(totalMemberCount)
-				.todayJoinCount(todayJoinCount)
-				.blockedCount(blockedCount)
-				.reviewCount(reviewCount)
-				.memberlogs(memberlogs)
-				.unSolvedReportCount(unSolvedReportCount)
-				.build();
-	}
-	public List<Member> findAll(){
-		return adminRepository.findAll();
-	}
-	
-    public Page<MemberListDto> getMemberList(PageRequestDTO requestDTO) {
-        return adminRepository.searchMemberList(requestDTO);
+    private final AdminReviewRepository adminReviewRepository;
+    private final ReportRepository reportRepository;
+    private final BlacklistRepository blacklistRepository;
+    private final MemberLogRepository memberlogRespository;
+    
+    public AdminMainPageDto getStatus() {
+    	long totlaMemberCount = adminRepository.countByRole("ROLE_USER");
+    	long blockedCount = blacklistRepository.countByStatus("BLOCKED");
+    	long reviewCount = adminReviewRepository.countByIsDeleted("N");
+    	List<Memberlog> memberlogList = memberlogRespository.findAll();
+    	long unSolvedReportCount = reportRepository.countByStatus("PENDING");
+    	
+    	return AdminMainPageDto.builder()
+    			.totalMemberCount(totlaMemberCount)
+    			.blockedCount(blockedCount)
+    			.reviewCount(reviewCount)
+    			.memberlogs(memberlogList)
+    			.unSolvedReportCount(unSolvedReportCount)
+    			.build();
     }
-	
-	public MemberDetailDto memberDetailDto(String memberId) {
-		Member member = adminRepository.findByMemberId(memberId);
-		long reviewCount = reviewRepository.countByMember(member);
-		
-		return MemberDetailDto.builder()
-				.memberName(member.getMemberName())
-				.memberAddr(member.getMemberAddr())
-				.memberGender(member.getMemberGender())
-				.memberEmail(member.getMemberEmail())
-				.memberId(memberId)
-				.memberReg(member.getMemberReg())
-				.memberReviewCount(reviewCount)
-				.isActive(member.getIsActive())
-				.build();
-	}
+    
+    /**
+     * 활성화된 일반 회원 목록 조회 (페이징)
+     * @param pageable 페이징 정보
+     * @return 회원 목록 페이지
+     */
+    public Page<MemberListDto> getActiveMemberList(Pageable pageable) {
+        return adminRepository.findActiveMembersWithCounts(pageable);
+    }
+    
+    /**
+     * 키워드로 활성화된 일반 회원 검색 (페이징)
+     * @param keyword 검색 키워드
+     * @param pageable 페이징 정보
+     * @return 회원 목록 페이지
+     */
+    public Page<MemberListDto> searchActiveMemberList(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getActiveMemberList(pageable);
+        }
+        return adminRepository.findActiveMembersWithCountsByKeyword(keyword.trim(), pageable);
+    }
 }

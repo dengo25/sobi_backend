@@ -15,9 +15,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AdminMainPageDto {
 	private long totalMemberCount;
-	private long todayJoinCount;
 	private long blockedCount;
 	private long reviewCount;
 	private List<Memberlog> memberlogs;
-	private Long unSolvedReportCount;
+	private long unSolvedReportCount;
 }

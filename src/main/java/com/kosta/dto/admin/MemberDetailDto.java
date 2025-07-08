@@ -17,7 +17,6 @@ public class MemberDetailDto {
 	private String memberGender;
 	private String memberEmail;
 	private String memberAddr;
-	private String isActive;
 	private LocalDateTime memberReg;
 	private long memberReviewCount;
 }

@@ -29,7 +29,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewSea
   //Optional<Review> findById(Long rno);
   Optional<Review> findByRno(Long rno);
 
-  //완빈 추가
-  long countByMember(Member member);
+
   
 }

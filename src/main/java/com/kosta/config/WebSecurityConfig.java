@@ -65,15 +65,17 @@ public class WebSecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/faq").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/faq/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/faq/**").hasRole("ADMIN")
-//          .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/notice").authenticated()
-            .requestMatchers(HttpMethod.PUT, "/api/notice/**").authenticated()
-            .requestMatchers(HttpMethod.DELETE, "/api/notice/**").authenticated()
+            .requestMatchers(HttpMethod.GET, "/api/notice/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/notice").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.PUT, "/api/notice/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/notice/**").hasRole("ADMIN")
+            .requestMatchers("/api/s3/presigned").permitAll()
             .requestMatchers("/", "/auth/**","/api/review/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .requestMatchers("/", "/auth/**","/api/review/**","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .requestMatchers("/api/mypage/**").authenticated() // 마이페이지 인증 필요
             .requestMatchers("/api/messages/**").authenticated() // 쪽지 기능 인증 필요
+            .requestMatchers("/error").permitAll() // 인증이 필요한 페이지에 비 인가 회원이 접근하였을경우 에러 표기
             .anyRequest().authenticated() //나머지 요청은 인증 필요
         )
         

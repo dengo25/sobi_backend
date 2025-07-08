@@ -1,7 +1,6 @@
 package com.kosta.dto.community;
 
 import java.util.Date;
-
 import lombok.*;
 
 @Getter

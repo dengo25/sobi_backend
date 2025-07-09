@@ -2,7 +2,9 @@ package com.kosta.mapper.community;
 
 import com.kosta.domain.community.Notice;
 import com.kosta.domain.member.Member;
+import com.kosta.dto.common.PageResponseDTO;
 import com.kosta.dto.community.NoticeDTO;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -63,4 +65,5 @@ public class NoticeMapper {
         }
         return notice;
     }
+
 }

@@ -3,6 +3,7 @@ package com.kosta.service.community;
 import com.kosta.domain.community.Notice;
 import com.kosta.domain.community.NoticeImage;
 import com.kosta.domain.member.Member;
+import com.kosta.dto.common.PageResponseDTO;
 import com.kosta.dto.community.NoticeDTO;
 import com.kosta.mapper.community.NoticeMapper;
 import com.kosta.repository.community.NoticeRepository;
@@ -10,9 +11,12 @@ import com.kosta.repository.member.MemberRepository;
 import com.kosta.util.FileNameUtils;
 import com.kosta.util.HtmlSanitizer;
 import com.kosta.util.S3PresignedService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,8 +36,7 @@ import static com.kosta.mapper.community.NoticeMapper.toEntity;
 @RequiredArgsConstructor
 @Transactional
 public class NoticeServiceImpl implements NoticeService {
-    @Autowired
-    private S3PresignedService s3Service;
+    private final S3PresignedService s3Service;
 
     private final NoticeRepository noticeRepository;
     private final MemberRepository memberRepository;
@@ -43,6 +46,7 @@ public class NoticeServiceImpl implements NoticeService {
                 .map(NoticeMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
 
     public NoticeDTO getDetailNotice(int noticeNo){
         return noticeRepository.findById(noticeNo)
@@ -186,6 +190,137 @@ public class NoticeServiceImpl implements NoticeService {
         // return convertToDTO(savedNotice);
         return toDTO(savedNotice);
     }
+
+    // 검색
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Notice> searchNotices(String searchType, String keyword, Pageable pageable) {
+        switch (searchType.toLowerCase()) {
+            case "title":
+                return searchByTitle(keyword, pageable);
+            case "content":
+                return searchByContent(keyword, pageable);
+            case "all":
+            case "title_content":
+                return searchByTitleOrContent(keyword, pageable);
+            default:
+                return noticeRepository.findByIsVisibleOrderByNoticeCreateDateDesc("Y", pageable);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Notice> searchByTitle(String title, Pageable pageable) {
+        return noticeRepository.findByIsVisibleAndNoticeTitleContainingIgnoreCase("Y", title, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Notice> searchByContent(String content, Pageable pageable) {
+        return noticeRepository.findByIsVisibleAndNoticeContentContainingIgnoreCase("Y", content, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Notice> searchByTitleOrContent(String keyword, Pageable pageable) {
+        return noticeRepository.findByIsVisibleAndNoticeTitleContainingIgnoreCaseOrNoticeContentContainingIgnoreCase(
+                "Y", keyword, keyword, pageable);
+    }
+
+    // ========== 카운트 관련 메서드 ==========
+    @Override
+    @Transactional(readOnly = true)
+    public int getTotalNoticeCount() {
+        return noticeRepository.countByIsVisible("Y");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int getSearchNoticeCount(String searchType, String keyword) {
+        switch (searchType.toLowerCase()) {
+            case "title":
+                return noticeRepository.countByIsVisibleAndNoticeTitleContainingIgnoreCase("Y", keyword);
+            case "content":
+                return noticeRepository.countByIsVisibleAndNoticeContentContainingIgnoreCase("Y", keyword);
+            case "all":
+            case "title_content":
+                return noticeRepository.countByIsVisibleAndNoticeTitleContainingIgnoreCaseOrNoticeContentContainingIgnoreCase("Y", keyword, keyword);
+            default:
+                return 0;
+        }
+    }
+
+
+
+    // 페이징된 목록 조회
+    public PageResponseDTO<NoticeDTO> getNoticeListWithPaging(Pageable pageable){
+        log.info("페이징된 공지사항 목록 조회 - page: {}, size: {}, sort: {}",
+                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+
+        Page<Notice> noticePage = noticeRepository.findByIsVisibleOrderByNoticeCreateDateDesc("Y", pageable);
+
+        List<NoticeDTO> noticeDTOs = noticePage.getContent().stream()
+                .map(NoticeMapper::toDTO)
+                .collect(Collectors.toList());
+
+        return PageResponseDTO.<NoticeDTO>builder()
+                .content(noticeDTOs)
+                .currentPage(noticePage.getNumber())
+                .pageSize(noticePage.getSize())
+                .totalElements(noticePage.getTotalElements())
+                .totalPages(noticePage.getTotalPages())
+                .first(noticePage.isFirst())
+                .last(noticePage.isLast())
+                .build();
+    }
+
+
+    // 검색 조건에 따른 페이징 처리
+    public PageResponseDTO<NoticeDTO> searchNoticeWithPaging(String searchKeyword, String searchType, Pageable pageable){
+        log.info("검색 조건으로 공지사항 조회 - keyword: {}, type: {}, page: {}, size: {}",
+                searchKeyword, searchType, pageable.getPageNumber(), pageable.getPageSize());
+
+        Page<Notice> noticePage;
+
+        switch (searchType) {
+            case "title":
+                noticePage = noticeRepository.findByIsVisibleAndNoticeTitleContainingIgnoreCase("Y", searchKeyword, pageable);
+                break;
+            case "content":
+                noticePage = noticeRepository.findByIsVisibleAndNoticeContentContainingIgnoreCase("Y", searchKeyword, pageable);
+                break;
+            case "all":
+            default:
+                noticePage = noticeRepository.findByIsVisibleAndNoticeTitleContainingIgnoreCaseOrNoticeContentContainingIgnoreCase("Y", searchKeyword, searchKeyword, pageable);
+                break;
+        }
+
+        List<NoticeDTO> noticeDTOs = noticePage.getContent().stream()
+                .map(NoticeMapper::toDTO)
+                .collect(Collectors.toList());
+
+        return PageResponseDTO.<NoticeDTO>builder()
+                .content(noticeDTOs)
+                .currentPage(noticePage.getNumber())
+                .pageSize(noticePage.getSize())
+                .totalElements(noticePage.getTotalElements())
+                .totalPages(noticePage.getTotalPages())
+                .first(noticePage.isFirst())
+                .last(noticePage.isLast())
+                .build();
+    }
+
+
+    @Transactional
+    public void incrementViewCount(int noticeNo) {
+        int updatedRows = noticeRepository.incrementViewCount(noticeNo);
+
+        // 업데이트된 행이 없다면 게시글이 존재하지 않는 것
+        if (updatedRows == 0) {
+            throw new EntityNotFoundException("게시글을 찾을 수 없습니다. ID: " + noticeNo);
+        }
+    }
+
 
     // 이미지 URL 추출 메서드
     private List<String> extractImageUrls(String content) {

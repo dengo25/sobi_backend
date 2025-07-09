@@ -31,13 +31,11 @@ public class WebSecurityConfig {
     생성자 주입 방식으로 WebSecurityConfig에 전달하는 방식
   */
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
-  
-  
+
   private final OAuthSuccessHandler oAuthSuccessHandler;
   
   //리다이렉트 url정보를 쿠키에 저장하는 필터
   private final RedirectUrlCookieFilter redirectUrlFilter;
-  
   
   //필터체인에 등록하려면 JwtAuthenticationFilter에서 이 객체를 사용할 수 있어야하기 때문에 생성자 주입방식 사용
   public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter
@@ -60,21 +58,25 @@ public class WebSecurityConfig {
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //세션 사용 안 함 (JWT기반 인증)
         )
         .authorizeHttpRequests(auth -> auth
+            // 인증이 필요한 경로들을 먼저 설정
             .requestMatchers("/api/review/edit/**").authenticated()
-            .requestMatchers(HttpMethod.GET, "/api/faq").permitAll()
+            .requestMatchers("/api/review/my-reviews").authenticated() // 내가 쓴 후기 조회 인증 필요
+            .requestMatchers("/api/mypage/**").authenticated() // 마이페이지 인증 필요
+            .requestMatchers("/api/messages/**").authenticated() // 쪽지 기능 인증 필요
             .requestMatchers(HttpMethod.POST, "/api/faq").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/faq/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/faq/**").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/notice/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/notice").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/notice/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/notice/**").hasRole("ADMIN")
+
+            // 인증이 필요하지 않은 경로들
             .requestMatchers("/api/s3/presigned").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/faq").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/notice/**").permitAll()
             .requestMatchers("/", "/auth/**","/api/review/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .requestMatchers("/", "/auth/**","/api/review/**","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
-            .requestMatchers("/api/mypage/**").authenticated() // 마이페이지 인증 필요
-            .requestMatchers("/api/messages/**").authenticated() // 쪽지 기능 인증 필요
             .requestMatchers("/error").permitAll() // 인증이 필요한 페이지에 비 인가 회원이 접근하였을경우 에러 표기
             .anyRequest().authenticated() //나머지 요청은 인증 필요
         )

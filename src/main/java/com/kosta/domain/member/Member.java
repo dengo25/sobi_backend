@@ -27,6 +27,8 @@ public class Member {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+  
+//  @Column(name = "MEMBER_ID", nullable = false, unique = true, length = 20)
 
   @Column(name = "MEMBER_ID", nullable = false, unique = true)
   private String memberId;

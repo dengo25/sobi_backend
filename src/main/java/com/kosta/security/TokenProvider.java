@@ -1,6 +1,5 @@
 package com.kosta.security;
 
-
 import com.kosta.domain.member.Member;
 import com.kosta.security.vo.CustomMember;
 import io.jsonwebtoken.Claims;
@@ -36,8 +35,9 @@ public class TokenProvider {
     //JWT생성 및 반환
     return Jwts.builder()
         .signWith(SIGNING_KEY, SignatureAlgorithm.HS512) //서명 알고리즘과 키 설정
-        .setSubject(String.valueOf(member.getMemberId())) //사용자 ID를 subject로 설정
-        .claim("role", member.getRole()) //Oauth2 미 시용시 직접적으로 role 조회해서 넣어줘야한다.
+        .setSubject(String.valueOf(member.getId())) //숫자 ID를 subject로 설정 (수정됨)
+        .claim("memberId", member.getMemberId()) //문자열 ID는 별도 claim으로 저장
+        .claim("role", member.getRole()) //Oauth2 미 사용시 직접적으로 role 조회해서 넣어줘야한다.
         .setIssuer("sobi app") //토큰 발급자 정보 설정
         .setIssuedAt(new Date()) //토큰 발급 시간 설정
         .setExpiration(expiryDate) //만료 시간 설정
@@ -55,7 +55,18 @@ public class TokenProvider {
         .parseClaimsJws(token)
         .getBody(); //Payload(Claims)추출
     
-    return claims.getSubject(); //사용자 ID(subject) 반환
+    return claims.getSubject(); //숫자 ID(subject) 반환
+  }
+  
+  //토큰에서 문자열 memberId 추출하는 새로운 메서드 추가
+  public String getMemberIdFromToken(String token) {
+    Claims claims = Jwts.parserBuilder()
+        .setSigningKey(SIGNING_KEY)
+        .build()
+        .parseClaimsJws(token)
+        .getBody();
+    
+    return claims.get("memberId", String.class); // "memberId" claim에서 문자열 ID 추출
   }
   
   //사용자 ID만을 기반으로 토큰 생성(ex OAuth 사용자 등)

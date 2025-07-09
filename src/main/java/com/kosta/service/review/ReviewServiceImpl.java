@@ -27,11 +27,8 @@ public class ReviewServiceImpl implements ReviewService{
     return entityToDTO(review);
   }
   
-  
-  
   @Override
   public Long register(ReviewDTO rno) {
-    
     Review review = dtoToEntity(rno);
     Review result = reviewRepository.save(review);
     return result.getRno();
@@ -44,18 +41,15 @@ public class ReviewServiceImpl implements ReviewService{
     review.setTitle(dto.getTitle());
     review.setContent(dto.getContent());
     review.setImageNumber(dto.getImageNumber());
-    
   }
   
   @Override
   public void remove(Long rno) {
     reviewRepository.deleteById(rno);
-    
   }
   
   @Override
   public PageResponseDTO<ReviewDTO> getList(PageRequestDTO pageRequestDTO) {
-    
     //JPA
     Page<Review> result = reviewRepository.search1(pageRequestDTO);
     
@@ -71,8 +65,28 @@ public class ReviewServiceImpl implements ReviewService{
         .build();
     
     return responseDTO;
-  
-  
   }
   
+  @Override
+  public PageResponseDTO<ReviewDTO> getMyReviews(Long memberId, PageRequestDTO pageRequestDTO) {
+    log.info("getMyReviews - memberId: " + memberId);
+    
+    // 특정 회원의 모든 후기 조회 (페이징 없이)
+    List<Review> reviews = reviewRepository.findByMemberIdOrderByCreatedAtDesc(memberId);
+    
+    // Entity를 DTO로 변환
+    List<ReviewDTO> rnoList = reviews.stream()
+        .map(review -> entityToDTO(review))
+        .collect(Collectors.toList());
+    
+    // 간단한 응답 객체 생성 (페이징 정보는 기본값 사용)
+    PageResponseDTO<ReviewDTO> responseDTO =
+        PageResponseDTO.<ReviewDTO>withAll()
+        .rnoList(rnoList)
+        .pageRequestDTO(pageRequestDTO)
+        .totalCount(reviews.size())
+        .build();
+    
+    return responseDTO;
+  }
 }

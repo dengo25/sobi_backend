@@ -62,6 +62,7 @@ public class WebSecurityConfig {
             .requestMatchers("/", "/auth/**","/api/review/**","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .requestMatchers("/api/mypage/**").authenticated() // 마이페이지 인증 필요
             .requestMatchers("/api/messages/**").authenticated() // 쪽지 기능 인증 필요
+            .requestMatchers("/api/report/**").permitAll()
             .anyRequest().authenticated() //나머지 요청은 인증 필요
         )
         

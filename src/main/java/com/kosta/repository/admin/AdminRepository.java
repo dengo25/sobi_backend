@@ -11,9 +11,6 @@ import org.springframework.stereotype.Repository;
 import com.kosta.domain.member.Member;
 import com.kosta.dto.admin.MemberListDto;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 
 
 @Repository
@@ -48,5 +45,6 @@ public interface AdminRepository extends JpaRepository<Member, Long> {
            "GROUP BY m.id, m.memberName, m.memberId, m.memberReg " +
            "ORDER BY m.memberReg DESC")
     Page<MemberListDto> findActiveMembersWithCountsByKeyword(@Param("keyword") String keyword, Pageable pageable);
-
+    
+ 
 }

@@ -61,6 +61,8 @@ public class WebSecurityConfig {
             // 인증이 필요한 경로들을 먼저 설정
             .requestMatchers("/api/review/edit/**").authenticated()
             .requestMatchers("/api/review/my-reviews").authenticated() // 내가 쓴 후기 조회 인증 필요
+            .requestMatchers("/api/admin/**").permitAll()
+            .requestMatchers("/", "/auth/**","/api/review/**","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .requestMatchers("/api/mypage/**").authenticated() // 마이페이지 인증 필요
             .requestMatchers("/api/messages/**").authenticated() // 쪽지 기능 인증 필요
             .requestMatchers(HttpMethod.POST, "/api/faq").hasRole("ADMIN")
@@ -120,4 +122,4 @@ public class WebSecurityConfig {
     return source;
   }
   
-}
+}            //.requestMatchers("/", "/auth/**","/api/review/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용

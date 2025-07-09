@@ -47,5 +47,4 @@ public class RedirectUrlCookieFilter extends OncePerRequestFilter { //요청 당
 		//다음 필터 체인으로 요청 전달
 		filterChain.doFilter(request, response);
 	}
-	
 }

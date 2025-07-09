@@ -70,7 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String role = tokenProvider.getRoleFromToken(token);       // role 추출
         
         log.info("Authenticated user ID : " + userId);
-        log.info("Role from token : {}", role); // ✅ 로그 추가
+        log.info("Role from token : {}", role);
 
         // role 기반 권한 생성
         List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));

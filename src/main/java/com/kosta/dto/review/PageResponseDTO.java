@@ -45,8 +45,8 @@ public class PageResponseDTO<E> {
     //페이지네이션 하단에 나올 페이지 번호 리스트를 만든다.
     this.pageNumList = IntStream.rangeClosed(start, end).boxed().collect(Collectors.toList());
     
-    if (prev){
-      this.prevPage = start - 1;
-    }
+    this.prevPage = prev ? start - 1 : 0;
+    
+    this.nextPage = next ? end + 1 : 0;
   }
 }

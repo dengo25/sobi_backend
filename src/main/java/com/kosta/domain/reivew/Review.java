@@ -74,4 +74,16 @@ public class Review {
     this.updatedAt = LocalDateTime.now(); // 수정 시에만 갱신
   }
   
+  public void addImage(String fileUrl, String originalFileName, String fileType, String isThumbnail) {
+    ReviewImage image = ReviewImage.builder()
+        .fileUrl(fileUrl)
+        .originalFileName(originalFileName)
+        .fileType(fileType)
+        .isThumbnail(isThumbnail)
+        .review(this) //외래키 연관관계 주입
+        .build();
+    
+    this.images.add(image); //리스트추가
+  }
+  
 }

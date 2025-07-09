@@ -1,19 +1,28 @@
 package com.kosta.controller.community;
 
 import com.kosta.domain.community.Notice;
-import com.kosta.dto.community.FaqDTO;
+import com.kosta.dto.common.PageResponseDTO;
 import com.kosta.dto.community.NoticeDTO;
 import com.kosta.service.community.NoticeService;
 import com.kosta.util.S3PresignedService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,6 +44,95 @@ public class NoticeController {
         return noticeService.getAllNotice();
     }
 
+    // 페이징된 공지사항 목록 조회
+    @GetMapping("/page")
+    public PageResponseDTO<NoticeDTO> getNoticeList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "noticeCreateDate") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) String searchKeyword,
+            @RequestParam(required = false) String searchType) {
+
+        log.info("Notice 페이징 목록 조회 요청 - page: {}, size: {}, sortBy: {}, sortDirection: {}, searchKeyword: {}, searchType: {}",
+                page, size, sortBy, sortDirection, searchKeyword, searchType);
+
+        // 정렬 방향 설정
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ?
+                Sort.Direction.ASC : Sort.Direction.DESC;
+
+        // Pageable 객체 생성
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        // 검색 조건에 따른 페이징 처리
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            return noticeService.searchNoticeWithPaging(searchKeyword, searchType, pageable);
+        } else {
+            return noticeService.getNoticeListWithPaging(pageable);
+        }
+    }
+
+
+    // 전체 게시글 카운트
+    @GetMapping("/count")
+    public ResponseEntity<Map<String, Object>> getTotalNoticeCount() {
+        try {
+            long totalCount = noticeService.getTotalNoticeCount();
+            Map<String, Object> response = new HashMap<>();
+            response.put("totalCount", totalCount);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // 검색된 게시글 카운트
+    @GetMapping("/search/count")
+    public ResponseEntity<Map<String, Object>> getSearchNoticeCount(
+            @RequestParam String searchType,
+            @RequestParam String keyword) {
+        try {
+            long searchCount = noticeService.getSearchNoticeCount(searchType, keyword);
+            Map<String, Object> response = new HashMap<>();
+            response.put("searchCount", searchCount);
+            response.put("searchType", searchType);
+            response.put("keyword", keyword);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // 검색 (페이징)
+    @GetMapping("/search")
+    public ResponseEntity<Map<String, Object>> searchNotices(
+            @RequestParam String searchType,
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Notice> notices = noticeService.searchNotices(searchType, keyword, pageable);
+            long searchCount = noticeService.getSearchNoticeCount(searchType, keyword);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("notices", notices.getContent());
+            response.put("searchCount", searchCount);
+            response.put("totalPages", notices.getTotalPages());
+            response.put("currentPage", page);
+            response.put("pageSize", size);
+            response.put("searchType", searchType);
+            response.put("keyword", keyword);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+
+    // CRUD
     @GetMapping("/{noticeNo}")
     public NoticeDTO detail(@PathVariable int noticeNo) {
         log.info("Notice 선택된 상태 조회 요청");
@@ -81,7 +179,6 @@ public class NoticeController {
                 deleteImagesFromS3(deletedImageUrls, "notice");
             }
         }
-
         return updatedNotice;
     }
 
@@ -115,6 +212,17 @@ public class NoticeController {
             );
         }
     }
+
+
+
+    // 조회수 증가
+    @PatchMapping("/{noticeNo}/views")
+    public ResponseEntity<Void> incrementViewCount(@PathVariable int noticeNo){
+        noticeService.incrementViewCount(noticeNo);
+        return ResponseEntity.ok().build();
+    }
+
+
 
 
 

@@ -100,6 +100,9 @@ public class TokenProvider {
     
     return Jwts.builder()
         .setSubject(userPrincipal.getName())
+        .claim("role", userPrincipal.getRole())
+        .claim("memberEmail", userPrincipal.getMemberEmail())
+        .claim("memberName", userPrincipal.getMemberName())  //추가
         .setIssuedAt(new Date())
         .setExpiration(expiryDate)
         .signWith(SIGNING_KEY, SignatureAlgorithm.HS512)

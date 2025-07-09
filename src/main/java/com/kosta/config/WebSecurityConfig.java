@@ -63,7 +63,7 @@ public class WebSecurityConfig {
 						.requestMatchers("/api/messages/**").authenticated() // 쪽지 기능 인증 필요
 
 						// 인증이 필요하지 않은 경로들
-						.requestMatchers("/", "/auth/**").permitAll() // 루트 및 /auth/** 경로는 인증 없이 허용
+						.requestMatchers("/", "/error", "/favicon.ico", "/auth/**").permitAll() // 루트 및 /auth/** 경로는 인증 없이 허용
 						.requestMatchers("/api/review/**", "/api/review/detail/**").permitAll() // 일반 후기 조회는 허용
 						.requestMatchers("/api/category").permitAll() // 카테고리 조회 허용
 

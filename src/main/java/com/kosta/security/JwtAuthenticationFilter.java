@@ -73,11 +73,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.info("Role from token : {}", role); // ✅ 로그 추가
 
         // role 기반 권한 생성
-        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        // [이전버전 주석처리] List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        List<SimpleGrantedAuthority> authorities;
+        if (role.startsWith("ROLE_")) {
+          authorities = List.of(new SimpleGrantedAuthority(role));
+        } else {
+          authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        }
 
         //사용자 ID를 기반으로 인증 객체 생성(권한 있음)
         AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            userId, null, AuthorityUtils.createAuthorityList(role));
+            // [이전버전 주석처리] userId, null, AuthorityUtils.createAuthorityList(role));
+            userId, null, authorities);
 
         //요청 정보 추가(IP, 세션 등)
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

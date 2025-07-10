@@ -5,11 +5,14 @@ import java.util.Collection;
 import java.util.List;
 
 import com.kosta.domain.member.Member;
+import com.kosta.dto.common.PageResponseDTO;
 import com.kosta.service.community.FaqService;
 import com.kosta.dto.community.FaqDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +33,27 @@ public class FaqController {
 		log.info("FAQ 전체 목록 조회 요청");
 		return faqService.getAllFaqs();
 	}
+
+	@GetMapping("/page")
+	public PageResponseDTO<FaqDTO> getFaqList(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size,
+			@RequestParam(defaultValue = "faqCreateDate") String sortBy,
+			@RequestParam(defaultValue = "desc") String sortDirection) {
+
+		log.info("Faq 페이징 목록 조회 요청 - page: {}, size: {}, sortBy: {}, sortDirection: {}",
+				page, size, sortBy, sortDirection);
+
+		// 정렬 방향 설정
+		Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ?
+				Sort.Direction.ASC : Sort.Direction.DESC;
+
+		// Pageable 객체 생성
+		Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+		return faqService.getPage(page, size);
+	}
+
 
 	@PostMapping("")
 	public FaqDTO insert(@RequestBody FaqDTO dto, @AuthenticationPrincipal String memberId, Principal principal ){

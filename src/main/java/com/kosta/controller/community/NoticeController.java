@@ -69,7 +69,8 @@ public class NoticeController {
         if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
             return noticeService.searchNoticeWithPaging(searchKeyword, searchType, pageable);
         } else {
-            return noticeService.getNoticeListWithPaging(pageable);
+            //return noticeService.getNoticeListWithPaging(pageable);
+            return noticeService.getPage(page, size);
         }
     }
 

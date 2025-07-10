@@ -8,12 +8,14 @@ import com.kosta.dto.community.NoticeDTO;
 import com.kosta.mapper.community.NoticeMapper;
 import com.kosta.repository.community.NoticeRepository;
 import com.kosta.repository.member.MemberRepository;
+import com.kosta.service.common.GenericServiceImpl;
 import com.kosta.util.FileNameUtils;
 import com.kosta.util.HtmlSanitizer;
 import com.kosta.util.S3PresignedService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
@@ -34,13 +36,29 @@ import static com.kosta.mapper.community.NoticeMapper.toDTO;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+// @RequiredArgsConstructor
 @Transactional
-public class NoticeServiceImpl implements NoticeService {
+public class NoticeServiceImpl extends GenericServiceImpl<Notice, NoticeDTO, Integer>
+        implements NoticeService {
     private final S3PresignedService s3Service;
-
     private final NoticeRepository noticeRepository;
     private final MemberRepository memberRepository;
+
+    @Autowired
+    public NoticeServiceImpl(NoticeRepository noticeRepository,
+                             MemberRepository memberRepository,
+                             S3PresignedService s3Service) {
+        super(noticeRepository, NoticeMapper::toDTO);
+        this.noticeRepository = noticeRepository;
+        this.memberRepository = memberRepository;
+        this.s3Service = s3Service;
+    }
+
+    @Override
+    protected String getIdPropertyName() {
+        return "noticeNo";  // Notice 엔티티 PK 필드명
+    }
+
 
     public List<NoticeDTO> getAllNotice (){
         return noticeRepository.findByIsVisible("Y").stream()
@@ -273,9 +291,8 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
 
-
     // 페이징된 목록 조회
-    public PageResponseDTO<NoticeDTO> getNoticeListWithPaging(Pageable pageable){
+    public PageResponseDTO<NoticeDTO> getListWithPaging(Pageable pageable){
         log.info("페이징된 공지사항 목록 조회 - page: {}, size: {}, sort: {}",
                 pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
@@ -293,6 +310,8 @@ public class NoticeServiceImpl implements NoticeService {
                 .totalPages(noticePage.getTotalPages())
                 .first(noticePage.isFirst())
                 .last(noticePage.isLast())
+                .hasNext(noticePage.hasNext())
+                .hasPrevious(noticePage.hasPrevious())
                 .build();
     }
 

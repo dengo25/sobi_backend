@@ -3,13 +3,13 @@ package com.kosta.service.community;
 import com.kosta.domain.community.Notice;
 import com.kosta.dto.common.PageResponseDTO;
 import com.kosta.dto.community.NoticeDTO;
+import com.kosta.service.common.GenericService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-public interface NoticeService {
+public interface NoticeService extends GenericService<Notice, NoticeDTO> {
     // CRUD
     List<NoticeDTO> getAllNotice();
     NoticeDTO getDetailNotice(int noticeNo);
@@ -18,7 +18,8 @@ public interface NoticeService {
     NoticeDTO deleteNotice(int noticeNo);
 
     // 페이징 관련
-    PageResponseDTO<NoticeDTO> getNoticeListWithPaging(Pageable pageable);
+   // PageResponseDTO<NoticeDTO> getNoticeListWithPaging(Pageable pageable);
+    //PageResponseDTO<NoticeDTO> getNoticeListWithPaging(int page, int size);
     PageResponseDTO<NoticeDTO> searchNoticeWithPaging(String searchKeyword, String searchType, Pageable pageable);
 
     // 조회수

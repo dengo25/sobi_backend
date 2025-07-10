@@ -29,7 +29,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
   
   private final TokenProvider tokenProvider; //토큰 검증 및 사용자 ID추출을 위한 TokenProvider 의존성
-
+  
   
   //OPTION 요청은 필터를 건너 뛰도록 설정 (CORS 사정 요청 등 무시)
   @Override
@@ -70,15 +70,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String role = tokenProvider.getRoleFromToken(token);       // role 추출
         
         log.info("Authenticated user ID : " + userId);
-        log.info("Role from token : {}", role);
-
+        log.info("Role from token : {}", role); // ✅ 로그 추가
+        
         // role 기반 권한 생성
-        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
-
+        // [이전버전 주석처리] List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        List<SimpleGrantedAuthority> authorities;
+        if (role.startsWith("ROLE_")) {
+          authorities = List.of(new SimpleGrantedAuthority(role));
+        } else {
+          authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        }
+        
         //사용자 ID를 기반으로 인증 객체 생성(권한 있음)
         AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            userId, null, AuthorityUtils.createAuthorityList(role));
-
+            // [이전버전 주석처리] userId, null, AuthorityUtils.createAuthorityList(role));
+            userId, null, authorities);
+        
         //요청 정보 추가(IP, 세션 등)
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         
@@ -88,10 +95,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         //현재 쓰레드에 SecurityContext 등록
         SecurityContextHolder.setContext(securityContext);
-
+        
         Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // ✅ 로그 찍기용 구문 추가
         log.info("현재 사용자 권한: {}", auth.getAuthorities());
-
+        
       }
     } catch (Exception ex) {
       log.error("Could not set user authentication in security context", ex);

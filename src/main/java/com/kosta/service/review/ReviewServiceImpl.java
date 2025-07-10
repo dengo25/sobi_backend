@@ -61,15 +61,12 @@ public class ReviewServiceImpl implements ReviewService{
     Optional<Review> result = reviewRepository.findById(dto.getTno());
     Review review = result.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
     
-    // 🔧 기본 필드 수정
     review.setTitle(dto.getTitle());
     review.setContent(dto.getContent());
     review.setImageNumber(dto.getImageNumber());
     
-    // 🔧 기존 이미지 전부 제거 (연관 관계 끊기)
     review.clearImages();
     
-    // 🔧 새 이미지 리스트 다시 추가
     if (dto.getImages() != null && !dto.getImages().isEmpty()) {
       dto.getImages().forEach(imgDTO -> {
         review.addImage(

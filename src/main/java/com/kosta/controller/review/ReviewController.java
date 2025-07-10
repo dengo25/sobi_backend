@@ -56,6 +56,20 @@ public class ReviewController {
     return Map.of("SUCCESS", "INSERT");
   }
   
+  @PutMapping("/review/{tno}")
+  public ResponseEntity<?> updateReview(@PathVariable Long tno,
+                                        @RequestBody ReviewDTO reviewDTO) {
+    log.info(reviewDTO);
+    
+    // 혹시 DTO 안에 있는 tno와 경로 tno가 다른지도 확인
+    if (!tno.equals(reviewDTO.getTno())) {
+      return ResponseEntity.badRequest().body("Path의 tno와 DTO의 tno가 다릅니다.");
+    }
+    
+    reviewService.update(reviewDTO);
+    
+    return ResponseEntity.ok("리뷰 수정 완료");  }
+  
   @GetMapping("/category")
   public ResponseEntity<List<CategoryDTO>> getCategories() {
     List<CategoryDTO> categories = categoryService.getAllCategories();

@@ -58,6 +58,18 @@ public class WebSecurityConfig {
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //세션 사용 안 함 (JWT기반 인증)
         )
         .authorizeHttpRequests(auth -> auth
+            // [요청 순서] permitAll() → 특정 권한 → anyRequest().authenticated()
+            // 작성시 가장 구체적인 경로는 권한을 넘어서 가장 먼저 작성한다.
+
+            // 인증이 필요하지 않은 경로들
+            .requestMatchers("/api/s3/presigned").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/faq").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/notice/**").permitAll()
+            .requestMatchers("/", "/auth/**","/api/review/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
+            .requestMatchers("/", "/auth/**","/api/review/**","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
+            .requestMatchers("/error").permitAll() // 인증이 필요한 페이지에 비 인가 회원이 접근하였을경우 에러 표기
+
             // 인증이 필요한 경로들을 먼저 설정
             .requestMatchers("/api/review/edit/**").authenticated()
             .requestMatchers("/api/review/my-reviews").authenticated() // 내가 쓴 후기 조회 인증 필요
@@ -69,15 +81,6 @@ public class WebSecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/notice").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/notice/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/notice/**").hasRole("ADMIN")
-
-            // 인증이 필요하지 않은 경로들
-            .requestMatchers("/api/s3/presigned").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/faq").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/notice/**").permitAll()
-            .requestMatchers("/", "/auth/**","/api/review/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
-            .requestMatchers("/", "/auth/**","/api/review/**","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
-            .requestMatchers("/error").permitAll() // 인증이 필요한 페이지에 비 인가 회원이 접근하였을경우 에러 표기
             .anyRequest().authenticated() //나머지 요청은 인증 필요
         )
         

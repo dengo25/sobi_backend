@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -140,8 +141,15 @@ public class NoticeController {
     }
 
     @PostMapping("")
-    public NoticeDTO insert(@RequestBody NoticeDTO dto, @AuthenticationPrincipal String memberId){
+    public NoticeDTO insert(@RequestBody NoticeDTO dto,  Authentication authentication ,@AuthenticationPrincipal String memberId){
+        log.info("=== Controller 디버깅 ===");
+        log.info("JWT Authentication name: {}", authentication.getName());
+        log.info("JWT Authentication principal: {}", authentication.getPrincipal());
+        log.info("프론트엔드에서 받은 NoticeDTO.memberId: {}", dto.getMemberId());
+
+        System.out.println("memberId 쳌! "+memberId);
         System.out.println("Controller에서 받은 dto: " + dto);
+        System.out.println("Controller에서 받은 dto 모든 요소: " + dto.toString());
         System.out.println("Controller에서 받은 imageUrls: " + dto.getImageUrls());
 
         // 현재 권한 목록 확인
@@ -149,6 +157,18 @@ public class NoticeController {
                 SecurityContextHolder.getContext().getAuthentication().getAuthorities();
         authorities.forEach(auth -> log.info("현재 권한: {}", auth.getAuthority()));
 
+
+        // JWT에서 실제 사용자 ID 사용
+        String actualUserId = authentication.getName();
+        log.info("실제 사용할 사용자 ID: {}", actualUserId);
+
+        // DTO에 올바른 사용자 ID 설정
+        dto.setMemberId(actualUserId);
+        log.info("설정된 NoticeDTO.memberId: {}", dto.getMemberId());
+
+//        NoticeDTO result = noticeService.insertNotice(dto);
+//        return result;
+//
         dto.setMemberId(memberId);
         return noticeService.insertNotice(dto);
     }

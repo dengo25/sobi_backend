@@ -8,6 +8,9 @@ import com.kosta.repository.community.FaqRepository;
 import com.kosta.repository.member.MemberRepository;
 import com.kosta.util.HtmlSanitizer;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,7 @@ import static com.kosta.mapper.community.FaqMapper.toEntity;
 @RequiredArgsConstructor
 @Transactional
 public class FaqServiceImpl implements FaqService{
+    private static final Logger log = LoggerFactory.getLogger(FaqServiceImpl.class);
     private final FaqRepository faqRepository;
     private final MemberRepository memberRepository;
 
@@ -32,9 +36,16 @@ public class FaqServiceImpl implements FaqService{
     }
 
     public FaqDTO insertFaq(FaqDTO dto){
-        // Member 영속 객체 조회
-        Member member = memberRepository.findByMemberId(dto.getMemberId());
+        String memberId = SecurityContextHolder
+                            .getContext()
+                            .getAuthentication()
+                            .getPrincipal()
+                            .toString();
 
+        // Member 영속 객체 조회
+        // Member member = memberRepository.findByMemberId(dto.getMemberId());
+        Member member = memberRepository.findByMemberId(memberId);
+        log.info("memberId : {}", memberId);
         if(member == null){
             throw new RuntimeException("존재하지 않는 회원 입니다!");
         }

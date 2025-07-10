@@ -31,7 +31,7 @@ public class OAuthAttributes {
     return switch (registrationId) {
 //      case "kakao" -> ofKakao(userNameAttributeName, attributes);
 //      case "naver" -> ofNaver(userNameAttributeName, attributes);
-//      case "github" -> ofGitHub(userNameAttributeName, attributes);
+      case "github" -> ofGitHub(userNameAttributeName, attributes);
       default -> ofGoogle(userNameAttributeName, attributes);
     };
   }
@@ -46,7 +46,22 @@ public class OAuthAttributes {
         .nameAttributeKey(userNameAttributeName)
         .build();
   }
-
-
-
+  
+  
+  private static OAuthAttributes ofGitHub(String userNameAttributeName, Map<String, Object> attributes) {
+    String username = (String)attributes.get("login");
+    Integer id = (Integer)attributes.get("id");
+    String nickname = username;
+    String profileImageUrl = (String)attributes.get("avatar_url");
+    String email = (String)attributes.get("email");
+    
+    return OAuthAttributes.builder()
+        .memberName(nickname)
+        .memberEmail(email)
+        .profileImage(profileImageUrl)
+        .memberId("" + id)
+        .attributes(attributes)
+        .nameAttributeKey(userNameAttributeName)
+        .build();
+  }
 }

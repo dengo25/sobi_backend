@@ -6,6 +6,10 @@ import com.kosta.security.dto.OAuthAttributes;
 import com.kosta.security.vo.CustomMember;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -13,9 +17,11 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -51,29 +57,25 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     String email = attributes.getMemberEmail();
     String picture = attributes.getProfileImage();
     String id = attributes.getMemberId();
-    String socialType = "google";
-    
-//    if("naver".equals(registrationId)) {
-//      socialType = "naver";
-//    }
-//    else if("kakao".equals(registrationId)) {
-//      socialType = "kakao";
-//    }
-//    else if("github".equals(registrationId)) {
-//      socialType = "github";
-//
-//      //github는 이메일이 없을 수 있어서 한 번 더 호출
-//      if(email == null) {
-//        log.info("loadUser userRequest.getAccessToken().getTokenValue() = " + userRequest.getAccessToken().getTokenValue());
-//
-//        email = getEmailFromGitHub(userRequest.getAccessToken().getTokenValue());
-//
-//        log.info("loadUser GitHub email = " + email);
-//      }
-//    }
-//    else {
-//      socialType = "google";
-//    }
+    String socialType = "";
+
+
+
+     if("github".equals(registrationId)) {
+      socialType = "github";
+
+      //github는 이메일이 없을 수 있어서 한 번 더 호출
+      if(email == null) {
+        log.info("loadUser userRequest.getAccessToken().getTokenValue() = " + userRequest.getAccessToken().getTokenValue());
+
+        email = getEmailFromGitHub(userRequest.getAccessToken().getTokenValue());
+
+        log.info("loadUser GitHub email = " + email);
+      }
+    }
+    else {
+      socialType = "google";
+    }
     
     log.info("loadUser nameAttributeKey = " + nameAttributeKey);
     log.info("loadUser id = " + id);
@@ -122,31 +124,31 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     
   }
   
-//  private String getEmailFromGitHub(String accessToken) {
-//    String url = "https://api.github.com/user/emails"; //github 이메일 API
-//
-//    RestTemplate restTemplate = new RestTemplate(); //HTTP 요청 도구
-//
-//    //헤더 추가
-//    HttpHeaders headers = new HttpHeaders();
-//    headers.set("Authorization", "Bearer " + accessToken);
-//    headers.set("Accept", "application/vnd.github.v3+json");
-//
-//    HttpEntity<String> entity = new HttpEntity<>(headers);
-//
-//    ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET, entity, List.class);
-//
-//    List<Map<String, Object>> emails = response.getBody();
-//
-//    if (emails != null) {
-//      for (Map<String, Object> emailData : emails) {
-//        if ((Boolean) emailData.get("primary")) {
-//          return (String) emailData.get("email");
-//        }
-//      }
-//    }
-//
-//    return null;
-//  }
+  private String getEmailFromGitHub(String accessToken) {
+    String url = "https://api.github.com/user/emails"; //github 이메일 API
+
+    RestTemplate restTemplate = new RestTemplate(); //HTTP 요청 도구
+
+    //헤더 추가
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Authorization", "Bearer " + accessToken);
+    headers.set("Accept", "application/vnd.github.v3+json");
+
+    HttpEntity<String> entity = new HttpEntity<>(headers);
+
+    ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET, entity, List.class);
+
+    List<Map<String, Object>> emails = response.getBody();
+
+    if (emails != null) {
+      for (Map<String, Object> emailData : emails) {
+        if ((Boolean) emailData.get("primary")) {
+          return (String) emailData.get("email");
+        }
+      }
+    }
+
+    return null;
+  }
   
 }

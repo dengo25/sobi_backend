@@ -3,7 +3,7 @@ package com.kosta.dto.admin;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.kosta.domain.reivew.Review;
+import com.kosta.domain.review.Review;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

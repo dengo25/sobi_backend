@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.kosta.domain.blacklist.Blacklist;
 import com.kosta.domain.member.Member;
-import com.kosta.domain.reivew.Review;
+import com.kosta.domain.review.Review;
 import com.kosta.dto.admin.AdminMainPageDto;
 import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;

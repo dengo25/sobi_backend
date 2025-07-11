@@ -1,7 +1,7 @@
 package com.kosta.service.search;
 
-import com.kosta.domain.reivew.QReview;
-import com.kosta.domain.reivew.Review;
+import com.kosta.domain.review.QReview;
+import com.kosta.domain.review.Review;
 import com.kosta.dto.review.PageRequestDTO;
 import com.querydsl.jpa.JPQLQuery;
 import lombok.extern.log4j.Log4j2;
@@ -29,6 +29,11 @@ public class ReviewSearchImpl extends QuerydslRepositorySupport implements Revie
     query.leftJoin(review.images).fetchJoin();  // 이미지 연관
     query.leftJoin(review.member).fetchJoin();  // 작성자 연관
     query.select(review).distinct();            // 중복 제거
+    
+    //카테고리별 조회시 파라미터 추가할 수 있게 수정
+    if (pageRequestDTO.getCategory() != null) {
+      query.where(review.category.id.eq(pageRequestDTO.getCategory()));
+    }
     
     //Spring Data의 PageRequest를 이용해서 페이징 정보생성
     Pageable pageable = PageRequest.of(

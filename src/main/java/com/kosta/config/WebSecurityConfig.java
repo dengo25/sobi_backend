@@ -112,7 +112,9 @@ public class WebSecurityConfig {
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowCredentials(true); //자격증명 포함 허용(ex: 쿠키, Authorication 헤더)
-    configuration.setAllowedOrigins(List.of("http://localhost:5173")); //허용할 프론트엔드 도메인
+    configuration.setAllowedOrigins(List.of(
+        "http://localhost:5173",
+        "http://sobi-front.s3-website.ap-northeast-2.amazonaws.com")); //허용할 프론트엔드 도메인
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")); //허용 메서드
     configuration.setAllowedHeaders(List.of("*")); //모든 요청 헤더 허용
     configuration.setExposedHeaders(List.of("*")); //응답 헤더 노출

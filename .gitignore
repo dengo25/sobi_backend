@@ -33,5 +33,14 @@ out/
 /nbdist/
 /.nb-gradle/
 **/application-oauth2.properties
+**/application.properties
+.env
+.env.*
 ### VS Code ###
 .vscode/
+
+##docker
+Dockerfile
+.dockerignore
+**/app.jar
+**/build/libs/*.jar

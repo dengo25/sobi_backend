@@ -13,10 +13,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReportListDto {
 
+	private int reportId;
 	private String reporterId;
 	private String reportedId;
 	private String reportType;
 	private String status;
 	private LocalDateTime createdAt;
+	private int targetId;
 	
 }

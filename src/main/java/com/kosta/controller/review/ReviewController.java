@@ -10,12 +10,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Log4j2
 @RestController
@@ -47,6 +45,15 @@ public class ReviewController {
     log.info("getMyReviews - userId: " + userId + ", pageRequestDTO: " + pageRequestDTO);
     
     return reviewService.getMyReviews(Long.parseLong(userId), pageRequestDTO);
+  }
+  
+  @PostMapping("/review")
+  public  Map<String, String> insert(@RequestBody ReviewDTO dto) {
+    log.info(dto);
+    System.out.println("받은 데이터 = " + dto);
+    reviewService.register(dto);
+    
+    return Map.of("SUCCESS", "INSERT");
   }
   
   @GetMapping("/category")

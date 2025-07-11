@@ -1,7 +1,9 @@
 package com.kosta.service.admin;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.kosta.dto.blacklist.BlacklistDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -9,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.kosta.domain.blacklist.Blacklist;
 import com.kosta.domain.member.Member;
-import com.kosta.domain.reivew.Review;
 import com.kosta.dto.admin.AdminMainPageDto;
 import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;
@@ -33,7 +34,6 @@ public class AdminService {
     
     public MemberDetailDto getMember(String memberId) {
     	Member member = adminRepository.findByMemberId(memberId);
-    	List<Review> recentReviews = adminReviewRepository.findTop5ByMemberOrderByCreatedAtDesc(member);
     	long memberReviewCount = adminReviewRepository.countByMemberAndIsDeleted(member,"N");
     	return MemberDetailDto.builder()
     			.memberName(member.getMemberName())
@@ -43,24 +43,32 @@ public class AdminService {
     			.memberAddr(member.getMemberAddr())
     			.memberReg(member.getMemberReg())
     			.memberReviewCount(memberReviewCount)
-    			.recentReviews(recentReviews)
     			.build();
     }
     
     public AdminMainPageDto getStatus() {
-    	long totlaMemberCount = adminRepository.countByRole("ROLE_USER");
+    	long totalMemberCount = adminRepository.countByRole("ROLE_USER");
     	long blockedCount = blacklistRepository.countByStatus("BLOCKED");
     	long reviewCount = adminReviewRepository.countByIsDeleted("N");
-    	List<Blacklist> blacklist = blacklistRepository.getBlockedMember();
+		// 블랙리스트 DTO 변환
+		List<Blacklist> blacklistEntities = blacklistRepository.getBlockedMember();
+		List<BlacklistDto> blacklistDtos = blacklistEntities.stream()
+				.map(bl -> BlacklistDto.builder()
+					.blackListNo(bl.getBlackListNo())
+					.memberId(bl.getMember().getMemberId())
+					.memberName(bl.getMember().getMemberName())
+					.updateAt(bl.getUpdateAt())
+					.build())
+				.collect(Collectors.toList());
     	long unSolvedReportCount = reportRepository.countByStatus("PENDING");
-    	
-    	return AdminMainPageDto.builder()
-    			.totalMemberCount(totlaMemberCount)
-    			.blockedCount(blockedCount)
-    			.reviewCount(reviewCount)
-    			.blacklist(blacklist)
-    			.unSolvedReportCount(unSolvedReportCount)
-    			.build();
+
+		return AdminMainPageDto.builder()
+				.totalMemberCount(totalMemberCount)
+				.blockedCount(blockedCount)
+				.reviewCount(reviewCount)
+				.blacklistDto(blacklistDtos)
+				.unSolvedReportCount(unSolvedReportCount)
+				.build();
     }
     
     /**
@@ -70,18 +78,5 @@ public class AdminService {
      */
     public Page<MemberListDto> getActiveMemberList(Pageable pageable) {
         return adminRepository.findActiveMembersWithCounts(pageable);
-    }
-    
-    /**
-     * 키워드로 활성화된 일반 회원 검색 (페이징)
-     * @param keyword 검색 키워드
-     * @param pageable 페이징 정보
-     * @return 회원 목록 페이지
-     */
-    public Page<MemberListDto> searchActiveMemberList(String keyword, Pageable pageable) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return getActiveMemberList(pageable);
-        }
-        return adminRepository.findActiveMembersWithCountsByKeyword(keyword.trim(), pageable);
     }
 }

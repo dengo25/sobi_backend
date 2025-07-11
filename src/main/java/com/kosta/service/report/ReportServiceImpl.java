@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.kosta.domain.member.Member;
 import com.kosta.domain.report.Report;
+import com.kosta.dto.report.ProcessReportDto;
 import com.kosta.dto.report.ReportDto;
 import com.kosta.dto.report.ReportListDto;
 import com.kosta.dto.report.ReportSearchDto;
@@ -22,6 +23,10 @@ import com.kosta.repository.report.ReportRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import com.kosta.dto.report.ReportDetailDto;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
@@ -120,11 +125,50 @@ public class ReportServiceImpl implements ReportService {
      */
     private ReportListDto convertToListDto(Report report) {
         return ReportListDto.builder()
+        	.reportId(report.getReportId())
             .reporterId(report.getReporterId().getMemberId())  // Member에서 ID 추출
             .reportedId(report.getReportedId().getMemberId())  // Member에서 ID 추출
             .reportType(report.getReportType())
             .status(report.getStatus())
             .createdAt(report.getCreatedAt())
+            .targetId(report.getTargetId())
             .build();
+    }
+    @Override
+    public ReportDetailDto getReportDetail(int reportId) {
+        Report report = reportRepository.findByIdWithMembers(reportId)
+            .orElseThrow(() -> new RuntimeException("신고를 찾을 수 없습니다: " + reportId));
+        
+        return ReportDetailDto.builder()
+            .reportId(report.getReportId())
+            .reporterId(report.getReporterId().getMemberId())
+            .reporterName(report.getReporterId().getMemberName())
+            .reportedId(report.getReportedId().getMemberId())
+            .reportedName(report.getReportedId().getMemberName())
+            .reportType(report.getReportType())
+            .detail(report.getDetail())
+            .targetId(report.getTargetId())
+            .status(report.getStatus())
+            .createdAt(report.getCreatedAt())
+            .build();
+    }
+
+    @Override
+    @Transactional
+    public void processReport(int reportId, ProcessReportDto processDto) {
+        Report report = reportRepository.findById(reportId)
+            .orElseThrow(() -> new RuntimeException("신고를 찾을 수 없습니다: " + reportId));
+        
+        if (!"PENDING".equals(report.getStatus())) {
+            throw new RuntimeException("이미 처리된 신고입니다.");
+        }
+        
+        // 상태 업데이트
+        String newStatus = "APPROVE".equals(processDto.getAction()) ? "PROCESSED" : "REJECTED";
+        report.setStatus(newStatus);
+        
+        reportRepository.save(report);
+        
+        log.info("신고 처리 완료 - ID: {}, 상태: {}", reportId, newStatus);
     }
 }

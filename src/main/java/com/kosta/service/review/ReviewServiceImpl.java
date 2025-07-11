@@ -1,9 +1,11 @@
 package com.kosta.service.review;
 
+import com.kosta.domain.member.Member;
 import com.kosta.domain.reivew.Review;
 import com.kosta.dto.review.PageRequestDTO;
 import com.kosta.dto.review.PageResponseDTO;
 import com.kosta.dto.review.ReviewDTO;
+import com.kosta.repository.member.MemberRepository;
 import com.kosta.repository.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService{
   private final ReviewRepository reviewRepository;
+  private final MemberRepository memberRepository;
   
   @Override
   public ReviewDTO get(Long rno) {
@@ -28,8 +31,26 @@ public class ReviewServiceImpl implements ReviewService{
   }
   
   @Override
-  public Long register(ReviewDTO rno) {
-    Review review = dtoToEntity(rno);
+  public Long register(ReviewDTO dto) {
+    Review review = dtoToEntity(dto);
+    Member member = memberRepository.findByMemberId(dto.getMemberId());
+    review.setMember(member);
+    
+    if(member == null){
+      throw new RuntimeException("존재하지 않는 회원 입니다!");
+    }
+    
+    if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+      dto.getImages().forEach(imgDTO -> {
+        review.addImage(
+            imgDTO.getFileUrl(),
+            imgDTO.getOriginalFileName(),
+            imgDTO.getFileType(),
+            imgDTO.getIsThumbnail()
+        );
+      });
+    }
+    
     Review result = reviewRepository.save(review);
     return result.getRno();
   }

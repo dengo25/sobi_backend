@@ -13,8 +13,7 @@ import org.springframework.stereotype.Repository;
 
 
 import com.kosta.domain.report.Report;
-import com.kosta.dto.report.ReportListDto;
-
+import java.util.Optional;
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Integer> {
     // 특정 회원이 신고 받은 횟수 조회
@@ -48,4 +47,13 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     
     @Query("SELECT COUNT(r) FROM Report r WHERE r.reportType = :reportType")
     long countByReportType(@Param("reportType") String reportType);
+    
+    
+
+	 //신고 상세 조회 (회원 정보 포함)
+	 @Query("SELECT r FROM Report r " +
+	        "JOIN FETCH r.reporterId " +
+	        "JOIN FETCH r.reportedId " +
+	        "WHERE r.reportId = :reportId")
+	 Optional<Report> findByIdWithMembers(@Param("reportId") int reportId);
 }

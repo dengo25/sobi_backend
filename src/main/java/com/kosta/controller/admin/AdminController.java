@@ -18,7 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kosta.dto.admin.AdminMainPageDto;
 import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;
+import com.kosta.dto.review.PageRequestDTO;
+import com.kosta.dto.review.PageResponseDTO;
+import com.kosta.dto.review.ReviewDTO;
 import com.kosta.service.admin.AdminService;
+import com.kosta.service.review.ReviewService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminController {
     
     private final AdminService adminService;
+    private final ReviewService reviewService;
     
     @GetMapping("/member/{memberId}")
     public ResponseEntity<MemberDetailDto> getMember(@PathVariable("memberId") String memberId) {
@@ -44,12 +50,11 @@ public class AdminController {
     public ResponseEntity<?> getMemberList(
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
-            @RequestParam(name = "keyword", defaultValue = "") String keyword,
             @RequestParam(name = "sortBy", defaultValue = "memberReg") String sortBy,
             @RequestParam(name = "sortDir", defaultValue = "desc") String sortDir) {
         
-        log.info("회원 목록 조회 요청 - page: {}, size: {}, keyword: {}, sortBy: {}, sortDir: {}", 
-                page, size, keyword, sortBy, sortDir);
+        log.info("회원 목록 조회 요청 - page: {}, size: {}, sortBy: {}, sortDir: {}",
+                page, size, sortBy, sortDir);
         
         try {
             // 클라이언트는 1부터 시작하는 페이지를 사용하므로 -1
@@ -63,12 +68,7 @@ public class AdminController {
             Pageable pageable = PageRequest.of(adjustedPage, size, Sort.by(sortDirection, sortBy));
             
             // 회원 목록 조회
-            Page<MemberListDto> memberPage;
-            if (keyword == null || keyword.trim().isEmpty()) {
-                memberPage = adminService.getActiveMemberList(pageable);
-            } else {
-                memberPage = adminService.searchActiveMemberList(keyword, pageable);
-            }
+            Page<MemberListDto> memberPage = adminService.getActiveMemberList(pageable);
             
             log.info("회원 목록 조회 성공 - 총 {}개 회원, {}페이지", 
                     memberPage.getTotalElements(), memberPage.getTotalPages());
@@ -86,5 +86,17 @@ public class AdminController {
             
             return ResponseEntity.status(500).body(errorResponse);
         }
+    }
+    
+    @GetMapping("/review/{tno}")
+    public ReviewDTO get(@PathVariable("tno") Long tno) {
+      return reviewService.get(tno);
+    }
+    
+    @GetMapping("/review/list")
+    public PageResponseDTO<ReviewDTO> list(PageRequestDTO pageRequestDTO) {
+      log.info("list.............. " + pageRequestDTO);
+      
+      return reviewService.getList(pageRequestDTO);
     }
 }

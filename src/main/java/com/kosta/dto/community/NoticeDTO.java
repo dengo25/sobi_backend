@@ -10,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class NoticeDTO {
     private int noticeNo;
     private String memberId;

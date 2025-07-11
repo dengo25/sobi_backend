@@ -8,6 +8,7 @@ import com.kosta.dto.community.NoticeDTO;
 import com.kosta.mapper.community.NoticeMapper;
 import com.kosta.repository.community.NoticeRepository;
 import com.kosta.repository.member.MemberRepository;
+import com.kosta.service.common.GenericServiceImpl;
 import com.kosta.util.FileNameUtils;
 import com.kosta.util.HtmlSanitizer;
 import com.kosta.util.S3PresignedService;
@@ -18,28 +19,46 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.RuntimeException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.kosta.mapper.community.NoticeMapper.toDTO;
-import static com.kosta.mapper.community.NoticeMapper.toEntity;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+// @RequiredArgsConstructor
 @Transactional
-public class NoticeServiceImpl implements NoticeService {
+public class NoticeServiceImpl extends GenericServiceImpl<Notice, NoticeDTO, Integer>
+        implements NoticeService {
     private final S3PresignedService s3Service;
-
     private final NoticeRepository noticeRepository;
     private final MemberRepository memberRepository;
+
+    @Autowired
+    public NoticeServiceImpl(NoticeRepository noticeRepository,
+                             MemberRepository memberRepository,
+                             S3PresignedService s3Service) {
+        super(noticeRepository, NoticeMapper::toDTO);
+        this.noticeRepository = noticeRepository;
+        this.memberRepository = memberRepository;
+        this.s3Service = s3Service;
+    }
+
+    @Override
+    protected String getIdPropertyName() {
+        return "noticeNo";  // Notice 엔티티 PK 필드명
+    }
+
 
     public List<NoticeDTO> getAllNotice (){
         return noticeRepository.findByIsVisible("Y").stream()
@@ -55,14 +74,33 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     public NoticeDTO insertNotice(NoticeDTO dto){
+        // SecurityContext에서 principal 가져오기
+        String userId = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+        log.info("SecurityContext 에서 꺼낸 userId: {}", userId);
+
         System.out.println("=== insertNotice 시작 ===");
+        System.out.println("dto.toString: " + dto.toString());
         System.out.println("dto.getImageUrls(): " + dto.getImageUrls());
 
+        Long userIds = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        boolean exists = memberRepository.existsById(userIds);
+        log.info("DB에 회원 존재 여부 (existsById={}): {}", userId, exists);
+
         // Member 영속 객체 조회
-        Member member = memberRepository.findByMemberId(dto.getMemberId());
-        if(member == null){
+        // Member member = memberRepository.findByMemberId(userId);
+//        if(member == null){
+//            throw new RuntimeException("존재하지 않는 회원 입니다!");
+//        }
+
+        Optional<Member> optMember = memberRepository.findById(userIds);
+        System.out.println("optMember : "+optMember);
+        if (optMember.isEmpty()) {
             throw new RuntimeException("존재하지 않는 회원 입니다!");
         }
+        Member member = optMember.get();
 
         Notice notice = NoticeMapper.toEntity(dto);
         notice.setMember(member);
@@ -104,9 +142,11 @@ public class NoticeServiceImpl implements NoticeService {
 
     public NoticeDTO updateNotice(NoticeDTO dto){
         System.out.println("=== updateNotice 시작 ===");
+        System.out.println("수정할 공지사항 dto: " + dto.toString());
         System.out.println("수정할 공지사항 번호: " + dto.getNoticeNo());
         System.out.println("dto.getImageUrls(): " + dto.getImageUrls());
 
+        // 디버깅용 로그 추가
         // 디버깅용 로그 추가
         System.out.println("dto.getMemberId(): " + dto.getMemberId());
 
@@ -251,9 +291,8 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
 
-
     // 페이징된 목록 조회
-    public PageResponseDTO<NoticeDTO> getNoticeListWithPaging(Pageable pageable){
+    public PageResponseDTO<NoticeDTO> getListWithPaging(Pageable pageable){
         log.info("페이징된 공지사항 목록 조회 - page: {}, size: {}, sort: {}",
                 pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
@@ -271,6 +310,8 @@ public class NoticeServiceImpl implements NoticeService {
                 .totalPages(noticePage.getTotalPages())
                 .first(noticePage.isFirst())
                 .last(noticePage.isLast())
+                .hasNext(noticePage.hasNext())
+                .hasPrevious(noticePage.hasPrevious())
                 .build();
     }
 

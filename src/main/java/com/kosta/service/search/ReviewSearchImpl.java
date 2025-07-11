@@ -30,6 +30,11 @@ public class ReviewSearchImpl extends QuerydslRepositorySupport implements Revie
     query.leftJoin(review.member).fetchJoin();  // 작성자 연관
     query.select(review).distinct();            // 중복 제거
     
+    if (pageRequestDTO.getCategory() != null) {
+      query.where(review.category.id.eq(pageRequestDTO.getCategory()));
+    }
+    
+    
     //Spring Data의 PageRequest를 이용해서 페이징 정보생성
     Pageable pageable = PageRequest.of(
         pageRequestDTO.getPage() - 1,

@@ -16,4 +16,7 @@ public class PageRequestDTO {
   
   @Builder.Default
   private int size = 10;
+  
+  //카테고리별 조회시
+  private Long category;
 }

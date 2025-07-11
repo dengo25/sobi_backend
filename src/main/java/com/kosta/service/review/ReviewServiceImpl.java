@@ -1,7 +1,7 @@
 package com.kosta.service.review;
 
 import com.kosta.domain.member.Member;
-import com.kosta.domain.reivew.Review;
+import com.kosta.domain.review.Review;
 import com.kosta.dto.review.PageRequestDTO;
 import com.kosta.dto.review.PageResponseDTO;
 import com.kosta.dto.review.ReviewDTO;

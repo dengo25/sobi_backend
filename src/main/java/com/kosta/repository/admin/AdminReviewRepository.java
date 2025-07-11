@@ -1,7 +1,7 @@
 package com.kosta.repository.admin;
 
 import com.kosta.domain.member.Member;
-import com.kosta.domain.reivew.Review;
+import com.kosta.domain.review.Review;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.kosta.domain.reivew;
+package com.kosta.domain.review;
 
 import com.kosta.domain.member.Member;
 import jakarta.persistence.*;

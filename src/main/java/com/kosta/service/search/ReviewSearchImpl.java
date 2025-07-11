@@ -1,7 +1,7 @@
 package com.kosta.service.search;
 
-import com.kosta.domain.reivew.QReview;
-import com.kosta.domain.reivew.Review;
+import com.kosta.domain.review.QReview;
+import com.kosta.domain.review.Review;
 import com.kosta.dto.review.PageRequestDTO;
 import com.querydsl.jpa.JPQLQuery;
 import lombok.extern.log4j.Log4j2;

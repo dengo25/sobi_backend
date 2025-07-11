@@ -70,7 +70,7 @@ public class NoticeController {
             return noticeService.searchNoticeWithPaging(searchKeyword, searchType, pageable);
         } else {
             //return noticeService.getNoticeListWithPaging(pageable);
-            return noticeService.getPage(page, size);
+            return noticeService.getListWithPaging(pageable);
         }
     }
 

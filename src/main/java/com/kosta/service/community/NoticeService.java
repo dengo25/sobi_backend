@@ -20,6 +20,7 @@ public interface NoticeService extends GenericService<Notice, NoticeDTO> {
     // 페이징 관련
    // PageResponseDTO<NoticeDTO> getNoticeListWithPaging(Pageable pageable);
     //PageResponseDTO<NoticeDTO> getNoticeListWithPaging(int page, int size);
+    PageResponseDTO<NoticeDTO> getListWithPaging(Pageable pageable);
     PageResponseDTO<NoticeDTO> searchNoticeWithPaging(String searchKeyword, String searchType, Pageable pageable);
 
     // 조회수

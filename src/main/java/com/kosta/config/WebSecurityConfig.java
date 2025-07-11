@@ -64,6 +64,7 @@ public class WebSecurityConfig {
             // 인증이 필요하지 않은 경로들
             .requestMatchers("/api/s3/presigned").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/faq").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/faq/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/notice/**").permitAll()
             .requestMatchers("/", "/auth/**","/api/review/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용

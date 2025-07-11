@@ -33,7 +33,7 @@ public class ReviewSearchImpl extends QuerydslRepositorySupport implements Revie
     if (pageRequestDTO.getCategory() != null) {
       query.where(review.category.id.eq(pageRequestDTO.getCategory()));
     }
-    
+  
     
     //Spring Data의 PageRequest를 이용해서 페이징 정보생성
     Pageable pageable = PageRequest.of(

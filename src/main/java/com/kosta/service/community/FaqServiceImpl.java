@@ -15,6 +15,7 @@ import com.kosta.service.common.GenericServiceImpl;
 import com.kosta.util.HtmlSanitizer;
 import com.kosta.util.S3PresignedService;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Not;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.kosta.mapper.community.FaqMapper.toDTO;
@@ -67,13 +69,24 @@ public class FaqServiceImpl extends GenericServiceImpl<Faq, FaqDTO, Integer>
                             .getPrincipal()
                             .toString();
 
+        Long userIds = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        boolean exists = memberRepository.existsById(userIds);
+        log.info("DB에 회원 존재 여부 (existsById={}): {}", memberId, exists);
+
         // Member 영속 객체 조회
         // Member member = memberRepository.findByMemberId(dto.getMemberId());
-        Member member = memberRepository.findByMemberId(memberId);
-        log.info("memberId : {}", memberId);
-        if(member == null){
+//        Member member = memberRepository.findByMemberId(memberId);
+//        log.info("memberId : {}", memberId);
+//        if(member == null){
+//            throw new RuntimeException("존재하지 않는 회원 입니다!");
+//        }
+
+        Optional<Member> optMember = memberRepository.findById(userIds);
+        System.out.println("optMember : "+optMember);
+        if (optMember.isEmpty()) {
             throw new RuntimeException("존재하지 않는 회원 입니다!");
         }
+        Member member = optMember.get();
 
         Faq faq = toEntity(dto);
         faq.setMember(member);
@@ -94,7 +107,9 @@ public class FaqServiceImpl extends GenericServiceImpl<Faq, FaqDTO, Integer>
         faq.setFaqAnswer(HtmlSanitizer.strictSanitize(dto.getFaqAnswer()));
         faq.setFaqEditDate(new Date());
 
-        return toDTO(faqRepository.save(faq));
+        Faq saveFaq  = faqRepository.save(faq);
+        return FaqMapper.toDTO(saveFaq);
+        // return toDTO(faqRepository.save(faq));
     }
 
     public void deleteFaq(int faqNo){

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -56,7 +57,7 @@ public class FaqController {
 
 
 	@PostMapping("")
-	public FaqDTO insert(@RequestBody FaqDTO dto, @AuthenticationPrincipal String memberId, Principal principal ){
+	public FaqDTO insert(@RequestBody FaqDTO dto, Authentication authentication, @AuthenticationPrincipal String memberId, Principal principal ){
 		// 현재 권한 목록 확인
 		Collection<? extends GrantedAuthority> authorities =
 				SecurityContextHolder.getContext().getAuthentication().getAuthorities();
@@ -66,6 +67,15 @@ public class FaqController {
 		log.info("접근자 ID: {}", principal.getName());
 		log.info("FAQ 등록 요청자 = {}", memberId);
 		log.info("FAQ 내용 등록");
+
+		// JWT에서 실제 사용자 ID 사용
+		String actualUserId = authentication.getName();
+		log.info("실제 사용할 사용자 ID: {}", actualUserId);
+
+		// DTO에 올바른 사용자 ID 설정
+		dto.setMemberId(actualUserId);
+		log.info("설정된 NoticeDTO.memberId: {}", dto.getMemberId());
+
 		dto.setMemberId(memberId);
 		return faqService.insertFaq(dto);
 	}

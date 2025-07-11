@@ -56,6 +56,10 @@ public class Review {
   @Builder.Default
   private List<ReviewImage> images = new ArrayList<>();
   
+  public void clearImages() {
+    this.images.clear(); //jpa는 이미지테이블이 연결되어 있어서 바꿔치기하면 안된다.
+  }
+  
   // 저장 직전에 자동 실행
   @PrePersist
   public void prePersist() {

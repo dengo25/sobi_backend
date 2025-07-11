@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,13 +57,30 @@ public class ReviewServiceImpl implements ReviewService{
   }
   
   @Override
-  public void modify(ReviewDTO dto) { //원래 엔티티를 가져와서 처리하기 떄문에 주의
+  public void update(ReviewDTO dto) {
     Optional<Review> result = reviewRepository.findById(dto.getTno());
-    Review review = result.orElseThrow();
+    Review review = result.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
+    
     review.setTitle(dto.getTitle());
     review.setContent(dto.getContent());
     review.setImageNumber(dto.getImageNumber());
+    
+    review.clearImages();
+    
+    if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+      dto.getImages().forEach(imgDTO -> {
+        review.addImage(
+            imgDTO.getFileUrl(),
+            imgDTO.getOriginalFileName(),
+            imgDTO.getFileType(),
+            imgDTO.getIsThumbnail()
+        );
+      });
+    } //end if
+    reviewRepository.save(review);
+    
   }
+
   
   @Override
   public void remove(Long rno) {

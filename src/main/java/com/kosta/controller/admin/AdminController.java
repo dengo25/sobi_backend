@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,6 +36,34 @@ public class AdminController {
     
     private final AdminService adminService;
     private final ReviewService reviewService;
+    
+    @GetMapping("/review/{tno}")
+    public ReviewDTO get(@PathVariable("tno") Long tno) {
+      return reviewService.get(tno);
+    }
+    
+    @GetMapping("/review/list")
+    public PageResponseDTO<ReviewDTO> list(PageRequestDTO pageRequestDTO) {
+      log.info("list.............. " + pageRequestDTO);
+      
+      return reviewService.getList(pageRequestDTO);
+    }
+    
+    @PatchMapping("/review/{tno}/approve")
+    public ResponseEntity<String> approveReview(@PathVariable Long tno) {
+        return ResponseEntity.ok(adminService.approveReview(tno));
+    }
+
+    @PatchMapping("/review/{tno}/reject")
+    public ResponseEntity<String> rejectReview(@PathVariable Long tno) {
+        return ResponseEntity.ok(adminService.rejectReview(tno));
+    }
+
+    @PatchMapping("/review/{tno}/block")
+    public ResponseEntity<String> blockReview(@PathVariable Long tno,
+                                              @RequestParam(required = false) String reason) {
+        return ResponseEntity.ok(adminService.blockReview(tno, reason));
+    }
     
     @GetMapping("/member/{memberId}")
     public ResponseEntity<MemberDetailDto> getMember(@PathVariable("memberId") String memberId) {
@@ -88,15 +117,4 @@ public class AdminController {
         }
     }
     
-    @GetMapping("/review/{tno}")
-    public ReviewDTO get(@PathVariable("tno") Long tno) {
-      return reviewService.get(tno);
-    }
-    
-    @GetMapping("/review/list")
-    public PageResponseDTO<ReviewDTO> list(PageRequestDTO pageRequestDTO) {
-      log.info("list.............. " + pageRequestDTO);
-      
-      return reviewService.getList(pageRequestDTO);
-    }
 }

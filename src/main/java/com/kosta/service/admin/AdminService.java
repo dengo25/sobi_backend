@@ -1,82 +1,28 @@
 package com.kosta.service.admin;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.kosta.dto.blacklist.BlacklistDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.kosta.domain.blacklist.Blacklist;
-import com.kosta.domain.member.Member;
 import com.kosta.dto.admin.AdminMainPageDto;
 import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;
-import com.kosta.repository.admin.AdminRepository;
-import com.kosta.repository.admin.AdminReviewRepository;
-import com.kosta.repository.blacklist.BlacklistRepository;
-import com.kosta.repository.report.ReportRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+public interface AdminService {
+    
+    // 관리자 메인 통계 조회
+    AdminMainPageDto getStatus();
 
-@Service
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
-@Slf4j
-public class AdminService {
-	private final AdminRepository adminRepository;
-    private final AdminReviewRepository adminReviewRepository;
-    private final ReportRepository reportRepository;
-    private final BlacklistRepository blacklistRepository;
-    
-    public MemberDetailDto getMember(String memberId) {
-    	Member member = adminRepository.findByMemberId(memberId);
-    	long memberReviewCount = adminReviewRepository.countByMemberAndIsDeleted(member,"N");
-    	return MemberDetailDto.builder()
-    			.memberName(member.getMemberName())
-    			.memberId(member.getMemberId())
-    			.memberGender(member.getMemberGender())
-    			.memberEmail(member.getMemberEmail())
-    			.memberAddr(member.getMemberAddr())
-    			.memberReg(member.getMemberReg())
-    			.memberReviewCount(memberReviewCount)
-    			.build();
-    }
-    
-    public AdminMainPageDto getStatus() {
-    	long totalMemberCount = adminRepository.countByRole("ROLE_USER");
-    	long blockedCount = blacklistRepository.countByStatus("BLOCKED");
-    	long reviewCount = adminReviewRepository.countByIsDeleted("N");
-		// 블랙리스트 DTO 변환
-		List<Blacklist> blacklistEntities = blacklistRepository.getBlockedMember();
-		List<BlacklistDto> blacklistDtos = blacklistEntities.stream()
-				.map(bl -> BlacklistDto.builder()
-					.blackListNo(bl.getBlackListNo())
-					.memberId(bl.getMember().getMemberId())
-					.memberName(bl.getMember().getMemberName())
-					.updateAt(bl.getUpdateAt())
-					.build())
-				.collect(Collectors.toList());
-    	long unSolvedReportCount = reportRepository.countByStatus("PENDING");
+    // 회원 상세 정보 조회
+    MemberDetailDto getMember(String memberId);
 
-		return AdminMainPageDto.builder()
-				.totalMemberCount(totalMemberCount)
-				.blockedCount(blockedCount)
-				.reviewCount(reviewCount)
-				.blacklistDto(blacklistDtos)
-				.unSolvedReportCount(unSolvedReportCount)
-				.build();
-    }
+    // 회원 리스트 조회 (페이징)
+    Page<MemberListDto> getActiveMemberList(Pageable pageable);
     
-    /**
-     * 활성화된 일반 회원 목록 조회 (페이징)
-     * @param pageable 페이징 정보
-     * @return 회원 목록 페이지
-     */
-    public Page<MemberListDto> getActiveMemberList(Pageable pageable) {
-        return adminRepository.findActiveMembersWithCounts(pageable);
-    }
+
+	String approveReview(Long tno);
+
+	String rejectReview(Long tno);
+
+	String blockReview(Long tno, String reason);
+
+
 }

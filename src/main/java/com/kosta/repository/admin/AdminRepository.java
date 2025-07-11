@@ -11,9 +11,6 @@ import org.springframework.stereotype.Repository;
 import com.kosta.domain.member.Member;
 import com.kosta.dto.admin.MemberListDto;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 
 
 @Repository
@@ -32,21 +29,8 @@ public interface AdminRepository extends JpaRepository<Member, Long> {
            "LEFT JOIN Review r ON m.memberId = r.member.memberId AND r.isDeleted = 'N' " +
            "LEFT JOIN Report rep ON m.memberId = rep.reportedId.memberId " +
            "WHERE m.isActive = 'Y' AND m.role = 'ROLE_USER' " +
-           "GROUP BY m.id, m.memberName, m.memberId, m.memberReg " +
-           "ORDER BY m.memberReg DESC")
+           "GROUP BY m.id, m.memberName, m.memberId, m.memberReg ")
     Page<MemberListDto> findActiveMembersWithCounts(Pageable pageable);
-    
-    @Query("SELECT new com.kosta.dto.admin.MemberListDto(" +
-           "m.memberName, m.memberId, m.memberReg, " +
-           "COUNT(DISTINCT r.rno), " +
-           "COUNT(DISTINCT rep.reportId)) " +
-           "FROM Member m " +
-           "LEFT JOIN Review r ON m.memberId = r.member.memberId AND r.isDeleted = 'N' " +
-           "LEFT JOIN Report rep ON m.memberId = rep.reportedId.memberId " +
-           "WHERE m.isActive = 'Y' AND m.role = 'ROLE_USER' " +
-           "AND (m.memberName LIKE %:keyword% OR m.memberId LIKE %:keyword%) " +
-           "GROUP BY m.id, m.memberName, m.memberId, m.memberReg " +
-           "ORDER BY m.memberReg DESC")
-    Page<MemberListDto> findActiveMembersWithCountsByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
+ 
 }

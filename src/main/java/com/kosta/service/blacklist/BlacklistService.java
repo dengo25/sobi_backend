@@ -1,26 +1,16 @@
 package com.kosta.service.blacklist;
 
 import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import com.kosta.domain.blacklist.Blacklist;
-import com.kosta.repository.blacklist.BlacklistRepository;
+import com.kosta.dto.blacklist.BlacklistRequestDto;
 
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+public interface BlacklistService {
 
-@Service
-@RequiredArgsConstructor
-@Transactional
-public class BlacklistService {
-	
-	private final BlacklistRepository blacklistRepository;
-	
-	public List<Blacklist> getBlockedMember(){
-		return blacklistRepository.getBlockedMember();
-	}
-	public Long getBlockedCount() {
-		return blacklistRepository.countByStatus("BLOCKED");
-	}
+    List<Blacklist> getBlockedMember();
+    Long getBlockedCount();
+    
+    // 새로운 메서드들 추가
+    void addToBlacklist(BlacklistRequestDto requestDto);
+    void removeFromBlacklist(String memberId, String reason);
+    boolean isBlacklisted(String memberId);
 }

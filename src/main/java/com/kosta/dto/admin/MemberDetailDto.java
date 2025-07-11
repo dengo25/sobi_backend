@@ -22,5 +22,4 @@ public class MemberDetailDto {
 	private String memberAddr;
 	private LocalDateTime memberReg;
 	private long memberReviewCount;
-	private List<Review> recentReviews;
 }

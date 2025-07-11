@@ -14,11 +14,17 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "BLACK_LIST")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Blacklist {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +38,7 @@ public class Blacklist {
 	private LocalDateTime updateAt;
 	
 	@Column(name = "STATUS", length = 20)
-	private String status = "BLOCKED";
+	private String status;
 	
 	@PrePersist
 	public void setUpdateAt() {
@@ -40,4 +46,5 @@ public class Blacklist {
 			this.updateAt = LocalDateTime.now();
 		}
 	}
+	
 }

@@ -73,6 +73,7 @@ public class WebSecurityConfig {
             .requestMatchers(HttpMethod.DELETE, "/api/notice/**").hasRole("ADMIN")
 
             // 인증이 필요하지 않은 경로들
+            .requestMatchers(HttpMethod.GET, "/api/category").permitAll()
             .requestMatchers("/api/s3/presigned").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/faq").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()

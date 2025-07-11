@@ -1,14 +1,17 @@
 package com.kosta.service.review;
 
+import com.kosta.domain.member.Member;
 import com.kosta.domain.reivew.Review;
 import com.kosta.dto.review.PageRequestDTO;
 import com.kosta.dto.review.PageResponseDTO;
 import com.kosta.dto.review.ReviewDTO;
+import com.kosta.repository.member.MemberRepository;
 import com.kosta.repository.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService{
   private final ReviewRepository reviewRepository;
+  private final MemberRepository memberRepository;
   
   @Override
   public ReviewDTO get(Long rno) {
@@ -28,20 +32,55 @@ public class ReviewServiceImpl implements ReviewService{
   }
   
   @Override
-  public Long register(ReviewDTO rno) {
-    Review review = dtoToEntity(rno);
+  public Long register(ReviewDTO dto) {
+    Review review = dtoToEntity(dto);
+    Member member = memberRepository.findByMemberId(dto.getMemberId());
+    review.setMember(member);
+    
+    if(member == null){
+      throw new RuntimeException("존재하지 않는 회원 입니다!");
+    }
+    
+    if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+      dto.getImages().forEach(imgDTO -> {
+        review.addImage(
+            imgDTO.getFileUrl(),
+            imgDTO.getOriginalFileName(),
+            imgDTO.getFileType(),
+            imgDTO.getIsThumbnail()
+        );
+      });
+    }
+    
     Review result = reviewRepository.save(review);
     return result.getRno();
   }
   
   @Override
-  public void modify(ReviewDTO dto) { //원래 엔티티를 가져와서 처리하기 떄문에 주의
+  public void update(ReviewDTO dto) {
     Optional<Review> result = reviewRepository.findById(dto.getTno());
-    Review review = result.orElseThrow();
+    Review review = result.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
+    
     review.setTitle(dto.getTitle());
     review.setContent(dto.getContent());
     review.setImageNumber(dto.getImageNumber());
+    
+    review.clearImages();
+    
+    if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+      dto.getImages().forEach(imgDTO -> {
+        review.addImage(
+            imgDTO.getFileUrl(),
+            imgDTO.getOriginalFileName(),
+            imgDTO.getFileType(),
+            imgDTO.getIsThumbnail()
+        );
+      });
+    } //end if
+    reviewRepository.save(review);
+    
   }
+
   
   @Override
   public void remove(Long rno) {

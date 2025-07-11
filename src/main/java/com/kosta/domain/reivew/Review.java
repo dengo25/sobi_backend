@@ -56,6 +56,10 @@ public class Review {
   @Builder.Default
   private List<ReviewImage> images = new ArrayList<>();
   
+  public void clearImages() {
+    this.images.clear(); //jpa는 이미지테이블이 연결되어 있어서 바꿔치기하면 안된다.
+  }
+  
   // 저장 직전에 자동 실행
   @PrePersist
   public void prePersist() {
@@ -72,6 +76,18 @@ public class Review {
   @PreUpdate
   public void preUpdate() {
     this.updatedAt = LocalDateTime.now(); // 수정 시에만 갱신
+  }
+  
+  public void addImage(String fileUrl, String originalFileName, String fileType, String isThumbnail) {
+    ReviewImage image = ReviewImage.builder()
+        .fileUrl(fileUrl)
+        .originalFileName(originalFileName)
+        .fileType(fileType)
+        .isThumbnail(isThumbnail)
+        .review(this) //외래키 연관관계 주입
+        .build();
+    
+    this.images.add(image); //리스트추가
   }
   
 }

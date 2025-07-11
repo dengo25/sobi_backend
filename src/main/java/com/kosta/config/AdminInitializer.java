@@ -24,6 +24,7 @@ public class AdminInitializer {
             admin.setMemberId("admin");
             admin.setMemberPassword(passwordEncoder.encode("admin1234"));
             admin.setRole("ROLE_ADMIN");
+            admin.setMemberName("ADMIN");
             memberRepository.save(admin);
         }
     }

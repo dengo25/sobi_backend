@@ -18,7 +18,7 @@ public interface ReviewService {
   
   Long register(ReviewDTO dto);
   
-  void modify(ReviewDTO dto);
+  void update(ReviewDTO dto);
   
   void remove(Long rno);
   
@@ -26,6 +26,8 @@ public interface ReviewService {
   
   // 현재 로그인한 사용자의 후기 목록 조회
   PageResponseDTO<ReviewDTO> getMyReviews(Long memberId, PageRequestDTO pageRequestDTO);
+  
+  
   
   default ReviewDTO entityToDTO(Review review) {
     if (review == null) return null;

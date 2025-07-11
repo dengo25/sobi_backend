@@ -10,12 +10,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Log4j2
 @RestController
@@ -48,6 +46,29 @@ public class ReviewController {
     
     return reviewService.getMyReviews(Long.parseLong(userId), pageRequestDTO);
   }
+  
+  @PostMapping("/review")
+  public  Map<String, String> insert(@RequestBody ReviewDTO dto) {
+    log.info(dto);
+    System.out.println("받은 데이터 = " + dto);
+    reviewService.register(dto);
+    
+    return Map.of("SUCCESS", "INSERT");
+  }
+  
+  @PutMapping("/review/{tno}")
+  public ResponseEntity<?> updateReview(@PathVariable Long tno,
+                                        @RequestBody ReviewDTO reviewDTO) {
+    log.info(reviewDTO);
+    
+    // 혹시 DTO 안에 있는 tno와 경로 tno가 다른지도 확인
+    if (!tno.equals(reviewDTO.getTno())) {
+      return ResponseEntity.badRequest().body("Path의 tno와 DTO의 tno가 다릅니다.");
+    }
+    
+    reviewService.update(reviewDTO);
+    
+    return ResponseEntity.ok("리뷰 수정 완료");  }
   
   @GetMapping("/category")
   public ResponseEntity<List<CategoryDTO>> getCategories() {

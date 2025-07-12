@@ -39,14 +39,38 @@
 # # 실행 명령
 # ENTRYPOINT ["java", "-jar", "app.jar"]
 
+#
+# # 1단계: 빌드
+# FROM gradle:8.5-jdk17 AS build
+# WORKDIR /app
+# COPY . .
+# RUN gradle clean build -x test
+#
+# # 2단계: 실행
+# FROM openjdk:17-jdk-slim
+# WORKDIR /app
+# COPY --from=build /app/build/libs/*.jar app.jar
+# EXPOSE 8080
+# ENTRYPOINT ["java", "-jar", "app.jar"]
 
-# 1단계: 빌드
+# 1단계: 빌드 단계
 FROM gradle:8.5-jdk17 AS build
 WORKDIR /app
-COPY . .
-RUN gradle clean build -x test
 
-# 2단계: 실행
+# 의존성 캐싱을 위한 최소 복사
+COPY build.gradle settings.gradle gradlew /app/
+COPY gradle /app/gradle
+
+# 의존성만 먼저 받아서 캐시 사용
+RUN ./gradlew build -x test || return 0
+
+# 전체 소스 복사 (의존성 설치 후)
+COPY . /app
+
+# 다시 빌드
+RUN ./gradlew clean build -x test
+
+# 2단계: 실행 단계 (슬림한 런타임)
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar

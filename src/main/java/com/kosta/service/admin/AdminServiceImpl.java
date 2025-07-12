@@ -8,12 +8,11 @@ import com.kosta.dto.blacklist.BlacklistDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.kosta.domain.blacklist.Blacklist;
 import com.kosta.domain.blacklisthistory.BlacklistHistory;
 import com.kosta.domain.member.Member;
-import com.kosta.domain.reivew.Review;
+import com.kosta.domain.review.Review;
 import com.kosta.dto.admin.AdminMainPageDto;
 import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;
@@ -22,7 +21,6 @@ import com.kosta.repository.admin.AdminReviewRepository;
 import com.kosta.repository.blacklist.BlacklistRepository;
 import com.kosta.repository.blacklisthistory.BlacklistHistoryRepository;
 import com.kosta.repository.report.ReportRepository;
-import com.kosta.repository.review.ReviewRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

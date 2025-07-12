@@ -52,7 +52,7 @@ public class FaqController {
 		// Pageable 객체 생성
 		Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-		return faqService.getPage(page, size);
+		return faqService.getListWithPaging(pageable);
 	}
 
 

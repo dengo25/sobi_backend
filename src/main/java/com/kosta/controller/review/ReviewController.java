@@ -68,7 +68,15 @@ public class ReviewController {
     
     reviewService.update(reviewDTO);
     
-    return ResponseEntity.ok("리뷰 수정 완료");  }
+    return ResponseEntity.ok("리뷰 수정 완료");
+  }
+  
+  
+  @DeleteMapping("/review/{tno}")
+  public Map<String, String> delete(@PathVariable("tno") Long tno) {
+    reviewService.remove(tno);
+    return Map.of("SUCCESS", "Delete");
+  }
   
   @GetMapping("/category")
   public ResponseEntity<List<CategoryDTO>> getCategories() {

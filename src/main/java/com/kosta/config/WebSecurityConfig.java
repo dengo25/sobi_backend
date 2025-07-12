@@ -68,7 +68,10 @@ public class WebSecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/notice/**").permitAll()
             .requestMatchers("/", "/auth/**","/api/review/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
-            .requestMatchers("/", "/auth/**","/api/review/**","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
+            .requestMatchers(
+                "/", "/auth/**", "/api/review/**", "/api/review/detail/**",
+                "/oauth2/**", "/login", "/login/**", "/login/oauth2/**", "/error"
+            ).permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .requestMatchers("/error").permitAll() // 인증이 필요한 페이지에 비 인가 회원이 접근하였을경우 에러 표기
 
             // 인증이 필요한 경로들을 먼저 설정

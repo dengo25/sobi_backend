@@ -10,6 +10,7 @@ import com.kosta.repository.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +23,25 @@ import java.util.stream.Collectors;
 public class ReviewServiceImpl implements ReviewService{
   private final ReviewRepository reviewRepository;
   private final MemberRepository memberRepository;
+  
+  //관리자 리뷰
+  @Override
+  public Page<ReviewDTO> getReviewPage(Pageable pageable) {
+      log.info("getReviewPage - pageable: " + pageable);
+      
+      // Repository에서 페이징 조회
+      Page<Review> reviewPage = reviewRepository.findAll(pageable);
+      
+      // Entity를 DTO로 변환
+      Page<ReviewDTO> reviewDTOPage = reviewPage.map(review -> entityToDTO(review));
+      
+      log.info("리뷰 페이지 조회 완료 - 총 {}개, 현재 페이지: {}/{}", 
+              reviewDTOPage.getTotalElements(), 
+              reviewDTOPage.getNumber() + 1, 
+              reviewDTOPage.getTotalPages());
+      
+      return reviewDTOPage;
+  }
   
   @Override
   public ReviewDTO get(Long rno) {

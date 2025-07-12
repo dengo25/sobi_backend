@@ -37,7 +37,7 @@ public class AdminServiceImpl implements AdminService {
     private final ReportRepository reportRepository;
     private final BlacklistRepository blacklistRepository;
     private final BlacklistHistoryRepository blacklistHistoryRepository;
-
+    
     @Override
     public MemberDetailDto getMember(String memberId) {
         Member member = adminRepository.findByMemberId(memberId);

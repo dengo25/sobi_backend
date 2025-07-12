@@ -7,6 +7,9 @@ import com.kosta.dto.review.PageRequestDTO;
 import com.kosta.dto.review.PageResponseDTO;
 import com.kosta.dto.review.ReviewDTO;
 import com.kosta.dto.review.ReviewImageDTO;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -21,6 +24,9 @@ public interface ReviewService {
   void update(ReviewDTO dto);
   
   void remove(Long rno);
+  
+  //관리자
+  Page<ReviewDTO> getReviewPage(Pageable pageable);
   
   PageResponseDTO<ReviewDTO> getList(PageRequestDTO pageRequestDTO);
   

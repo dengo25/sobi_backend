@@ -40,7 +40,9 @@ out/
 .vscode/
 
 ##docker
-Dockerfile
-.dockerignore
+#Dockerfile
+#.dockerignore
 **/app.jar
 **/build/libs/*.jar
+
+/src/main/generated/

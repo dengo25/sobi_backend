@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: dengo2000/sobi-backend:3.0
+    image: dengo2000/sobi-backend:latest
     container_name: sobi-backend
     ports:
       - "8080:8080"

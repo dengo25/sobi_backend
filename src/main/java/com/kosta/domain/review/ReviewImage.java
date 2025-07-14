@@ -1,8 +1,7 @@
-package com.kosta.domain.reivew;
+package com.kosta.domain.review;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.stereotype.Component;
 
 @Entity
 @Getter

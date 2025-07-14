@@ -1,6 +1,6 @@
 package com.kosta.repository.review;
 
-import com.kosta.domain.reivew.Review;
+import com.kosta.domain.review.Review;
 import com.kosta.service.search.ReviewSearch;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +28,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewSea
   
   //Optional<Review> findById(Long rno);
   Optional<Review> findByRno(Long rno);
+
+
   
   // 특정 회원의 후기 조회 (최신순 정렬)
   @EntityGraph(attributePaths = {"member", "category"})

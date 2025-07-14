@@ -103,6 +103,7 @@ public class TokenProvider {
         .claim("role", userPrincipal.getRole())
         .claim("memberEmail", userPrincipal.getMemberEmail())
         .claim("memberName", userPrincipal.getMemberName())  //추가
+        .claim("memberId", userPrincipal.getMemberId())// 추가
         .setIssuedAt(new Date())
         .setExpiration(expiryDate)
         .signWith(SIGNING_KEY, SignatureAlgorithm.HS512)

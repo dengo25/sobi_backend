@@ -1,8 +1,8 @@
 package com.kosta.service.review;
 
 import com.kosta.domain.member.Member;
-import com.kosta.domain.reivew.Category;
-import com.kosta.domain.reivew.Review;
+import com.kosta.domain.review.Category;
+import com.kosta.domain.review.Review;
 import com.kosta.dto.review.PageRequestDTO;
 import com.kosta.dto.review.PageResponseDTO;
 import com.kosta.dto.review.ReviewDTO;
@@ -18,7 +18,7 @@ public interface ReviewService {
   
   Long register(ReviewDTO dto);
   
-  void modify(ReviewDTO dto);
+  void update(ReviewDTO dto);
   
   void remove(Long rno);
   
@@ -26,6 +26,8 @@ public interface ReviewService {
   
   // 현재 로그인한 사용자의 후기 목록 조회
   PageResponseDTO<ReviewDTO> getMyReviews(Long memberId, PageRequestDTO pageRequestDTO);
+  
+  
   
   default ReviewDTO entityToDTO(Review review) {
     if (review == null) return null;

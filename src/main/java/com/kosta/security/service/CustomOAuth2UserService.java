@@ -60,13 +60,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     String socialType = "";
 
 
-    if("naver".equals(registrationId)) {
-      socialType = "naver";
-    }
-    else if("kakao".equals(registrationId)) {
-      socialType = "kakao";
-    }
-    else if("github".equals(registrationId)) {
+
+     if("github".equals(registrationId)) {
       socialType = "github";
 
       //github는 이메일이 없을 수 있어서 한 번 더 호출

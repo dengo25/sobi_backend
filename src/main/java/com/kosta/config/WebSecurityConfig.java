@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
 import java.util.List;
 
@@ -129,5 +130,12 @@ public class WebSecurityConfig {
     source.registerCorsConfiguration("/**", configuration); //모든 요청에 대해 설정 적용
     return source;
   }
+  
+  //Spring Security와 Spring OAuth2가 X-Forwarded-Proto 값을 믿고 https로 처리함.
+  @Bean
+  public ForwardedHeaderFilter forwardedHeaderFilter() {
+    return new ForwardedHeaderFilter();
+  }
+  
   
 }

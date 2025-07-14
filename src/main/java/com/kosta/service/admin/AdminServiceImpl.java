@@ -41,7 +41,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public MemberDetailDto getMember(String memberId) {
         Member member = adminRepository.findByMemberId(memberId);
-        long memberReviewCount = adminReviewRepository.countByMemberAndIsDeleted(member, "N");
+        long memberReviewCount = adminReviewRepository.countByMember(member);
         return MemberDetailDto.builder()
                 .memberName(member.getMemberName())
                 .memberId(member.getMemberId())
@@ -57,7 +57,7 @@ public class AdminServiceImpl implements AdminService {
     public AdminMainPageDto getStatus() {
         long memberNotBlockedCount = adminRepository.countMemberNotBlocked();
         long blockedCount = blacklistRepository.countByStatus("BLOCKED");
-        long reviewCount = adminReviewRepository.countByIsDeleted("N");
+        long reviewCount = adminReviewRepository.count();
 
         List<Blacklist> blacklistEntities = blacklistRepository.getBlockedMember();
         List<BlacklistDto> blacklistDtos = blacklistEntities.stream()
@@ -105,113 +105,96 @@ public class AdminServiceImpl implements AdminService {
         return "리뷰 반려 완료";
     }
 
-    @Override
-    public String blockReview(Long tno, String detail) {
-        Optional<Review> result = adminReviewRepository.findById(tno);
-        Review review = result.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
-        
-        review.setConfirmed("B");
-        review.setIsDeleted("Y");
+	@Override
+	public String blockReview(Long tno, String detail) {
+		Optional<Review> result = adminReviewRepository.findById(tno);
+		Review review = result.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
 
-        Member member = review.getMember();
-        
-        Optional<Blacklist> blacklistResult = blacklistRepository.findByMember(member);
-        Blacklist blacklist = null;
-        
-        if(blacklistResult.isPresent()) {
-        	blacklist = blacklistResult.get();
-        	if(!"BLOCKED".equals(blacklist.getStatus())) {
-        		blacklist.setStatus("BLOCKED");
-        		blacklist.setUpdateAt(LocalDateTime.now());
-        	}else {
-        		blacklist = Blacklist.builder()
-        	               .member(member)
-        	               .status("BLOCKED")
-        	               .build();
-        	}
-        	blacklistRepository.save(blacklist);
-        }
+		Member member = review.getMember();
 
-        // 블랙리스트 히스토리 등록
-        BlacklistHistory history = BlacklistHistory.builder()
-                .blacklist(blacklist) // 연관관계
-                .reportType("BLOCK")
-                .detail(detail)
-                .build();
-        blacklistHistoryRepository.save(history);
-        
-        member.setIsActive("N");
-        adminRepository.save(member);
-        List<Report> pendingReports = reportRepository.findPendingReportsByTargetId(tno.intValue());
+		Optional<Blacklist> blacklistResult = blacklistRepository.findByMember(member);
+		Blacklist blacklist = null;
 
-        if (!pendingReports.isEmpty()) {
-            for (Report report : pendingReports) {
-                report.setStatus("APPROVE");
-            }
-            reportRepository.saveAll(pendingReports);
-            log.info("리뷰 차단으로 인해 {}건의 신고가 처리완료로 변경되었습니다.", pendingReports.size());
-        }
+		if (blacklistResult.isPresent()) {
+			blacklist = blacklistResult.get();
+			if (!"BLOCKED".equals(blacklist.getStatus())) {
+				blacklist.setStatus("BLOCKED");
+				blacklist.setUpdateAt(LocalDateTime.now());
+			}
+		} else {
+			blacklist = Blacklist.builder().member(member).status("BLOCKED").build();
+		}
+		blacklistRepository.save(blacklist);
 
-        adminReviewRepository.save(review);
+		// 블랙리스트 히스토리 등록
+		BlacklistHistory history = BlacklistHistory.builder().blacklist(blacklist) // 연관관계
+				.reportType("BLOCK").detail(detail).build();
+		blacklistHistoryRepository.save(history);
 
-        return "리뷰 차단 및 블랙리스트 등록 완료";
-    }
+		member.setIsActive("N");
+		adminRepository.save(member);
+		List<Report> pendingReports = reportRepository.findPendingReportsByTargetId(tno.intValue());
+
+		if (!pendingReports.isEmpty()) {
+			for (Report report : pendingReports) {
+				report.setStatus("APPROVE");
+			}
+			reportRepository.saveAll(pendingReports);
+			log.info("리뷰 차단으로 인해 {}건의 신고가 처리완료로 변경되었습니다.", pendingReports.size());
+		}
+		
+		adminReviewRepository.delete(review);
+
+		return "리뷰 차단 및 블랙리스트 등록 완료";
+	}
     
-    @Override
-    public String approveReport(int reportId, Long tno, String detail) {
-    	Optional<Report> reportResult = reportRepository.findById(reportId);
-    	Report report = reportResult.orElseThrow(() -> new RuntimeException("신고내역이 존재하지 않습니다."));
-    	report.setStatus("APPROVE");
-    	
-    	Optional<Review> reviewResult = adminReviewRepository.findById(tno);
-    	Review review = reviewResult.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
-    	review.setIsDeleted("Y");
-    	review.setConfirmed("B");
-    	
-    	 Member member = review.getMember();
-         Optional<Blacklist> blacklistResult = blacklistRepository.findByMember(member);
-         Blacklist blacklist = null;
-         
-         if(blacklistResult.isPresent()) {
-         	blacklist = blacklistResult.get();
-         	if(!"BLOCKED".equals(blacklist.getStatus())) {
-         		blacklist.setStatus("BLOCKED");
-         		blacklist.setUpdateAt(LocalDateTime.now());
-         	}else {
-         		blacklist = Blacklist.builder()
-         	               .member(member)
-         	               .status("BLOCKED")
-         	               .build();
-         	}
-         	blacklistRepository.save(blacklist);
-         }
+	@Override
+	public String approveReport(int reportId, Long tno, String detail) {
+		Optional<Report> reportResult = reportRepository.findById(reportId);
+		Report report = reportResult.orElseThrow(() -> new RuntimeException("신고내역이 존재하지 않습니다."));
+		report.setStatus("APPROVE");
 
-         // 블랙리스트 히스토리 등록
-         BlacklistHistory history = BlacklistHistory.builder()
-                 .blacklist(blacklist)
-                 .reportType("BLOCK")
-                 .detail(detail)
-                 .build();
-         blacklistHistoryRepository.save(history);
-         
-         member.setIsActive("N");
-         adminRepository.save(member);
+		Optional<Review> reviewResult = adminReviewRepository.findById(tno);
+		Review review = reviewResult.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
 
-         List<Report> pendingReports = reportRepository.findPendingReportsByTargetId(tno.intValue());
+		Member member = review.getMember();
+		Optional<Blacklist> blacklistResult = blacklistRepository.findByMember(member);
+		Blacklist blacklist = null;
 
-         if (!pendingReports.isEmpty()) {
-             for (Report r: pendingReports) {
-                 r.setStatus("APPROVE");
-             }
-             reportRepository.saveAll(pendingReports);
-             log.info("리뷰 차단으로 인해 {}건의 신고가 처리완료로 변경되었습니다.", pendingReports.size());
-         }
-         
-         adminReviewRepository.save(review);
-         reportRepository.save(report);
-         
-    	return "신고 승인 및 리뷰 삭제 처리";
-    }
+		if (blacklistResult.isPresent()) {
+			blacklist = blacklistResult.get();
+			if (!"BLOCKED".equals(blacklist.getStatus())) {
+				blacklist.setStatus("BLOCKED");
+				blacklist.setUpdateAt(LocalDateTime.now());
+			} 		
+		}else {
+			blacklist = Blacklist.builder().member(member).status("BLOCKED").build();
+		}
+		blacklistRepository.save(blacklist);
+
+		// 블랙리스트 히스토리 등록
+		BlacklistHistory history = BlacklistHistory.builder().blacklist(blacklist).reportType("BLOCK").detail(detail)
+				.build();
+		blacklistHistoryRepository.save(history);
+
+		member.setIsActive("N");
+		adminRepository.save(member);
+
+		List<Report> pendingReports = reportRepository.findPendingReportsByTargetId(tno.intValue());
+
+		if (!pendingReports.isEmpty()) {
+			for (Report r : pendingReports) {
+				r.setStatus("APPROVE");
+			}
+			reportRepository.saveAll(pendingReports);
+			log.info("리뷰 차단으로 인해 {}건의 신고가 처리완료로 변경되었습니다.", pendingReports.size());
+		}
+
+		adminReviewRepository.delete(review);
+		reportRepository.save(report);
+
+		return "신고 승인 및 리뷰 삭제 처리";
+	}
     
     
     @Override 

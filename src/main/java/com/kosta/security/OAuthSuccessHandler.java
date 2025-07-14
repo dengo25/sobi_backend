@@ -21,8 +21,9 @@ import static com.kosta.security.RedirectUrlCookieFilter.REDIRECT_URI_PARAM;
 @Component
 //OAuth2 로그인 성공 시 처리 로직 담당 클래스
 public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-
-	private static final String LOCAL_REDIRECT_URL = "http://sobi-front.s3-website.ap-northeast-2.amazonaws.com"; //기본 리다이렉트 주소
+	
+	//	private static final String LOCAL_REDIRECT_URL = "http://sobi-front.s3-website.ap-northeast-2.amazonaws.com"; //기본 리다이렉트 주소
+	private static final String LOCAL_REDIRECT_URL = "https://sobi.thekosta.com";
 
 	//로그인 인증이 성공했을 때 호출되는 메서드
 	@Override

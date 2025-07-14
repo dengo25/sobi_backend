@@ -13,9 +13,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -30,21 +32,16 @@ public class WebSecurityConfig {
   
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final OAuthSuccessHandler oAuthSuccessHandler;
-//  private final RedirectUrlCookieFilter redirectUrlFilter;
-public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                         OAuthSuccessHandler oAuthSuccessHandler) {
-  this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-  this.oAuthSuccessHandler = oAuthSuccessHandler;
-}
+  private final RedirectUrlCookieFilter redirectUrlFilter;
   
-//  public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter
-//      , OAuthSuccessHandler oAuthSuccessHandler
-//      , RedirectUrlCookieFilter redirectUrlFilter) {
-//    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-//    this.oAuthSuccessHandler = oAuthSuccessHandler;
-//    this.redirectUrlFilter = redirectUrlFilter;
-//  }
-//
+  public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter
+      , OAuthSuccessHandler oAuthSuccessHandler
+      , RedirectUrlCookieFilter redirectUrlFilter) {
+    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    this.oAuthSuccessHandler = oAuthSuccessHandler;
+    this.redirectUrlFilter = redirectUrlFilter;
+  }
+  
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService,
                                           ClientRegistrationRepository clientRegistrationRepository
@@ -57,8 +54,6 @@ public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
             .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
         )
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/health").permitAll()
-            
             // OAuth2 관련 경로들을 먼저 허용
             .requestMatchers("/oauth2/**", "/login/**", "/login/oauth2/**", "/error").permitAll()
             
@@ -85,7 +80,7 @@ public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
             .anyRequest().authenticated()
         )
         
-        // OAuth2 로그인 설정 (authorizationRequestCustomizer 제거)
+        // OAuth2 로그인 설정 (authorizationRequestCustomizer 제거!)
         .oauth2Login(oauth2 -> oauth2
             .userInfoEndpoint(userInfo -> userInfo
                 .userService(customOAuth2UserService)
@@ -104,7 +99,7 @@ public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
         )
         
         // 필터 순서 조정: OAuth2 관련 필터들을 JWT 필터보다 먼저 실행
-//        .addFilterBefore(redirectUrlFilter, OAuth2AuthorizationRequestRedirectFilter.class)
+        .addFilterBefore(redirectUrlFilter, OAuth2AuthorizationRequestRedirectFilter.class)
         .addFilterAfter(jwtAuthenticationFilter, OAuth2AuthorizationRequestRedirectFilter.class);
     
     return http.build();
@@ -133,4 +128,5 @@ public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
     bean.setFilter(new ForwardedHeaderFilter());
     return bean;
   }
+
 }

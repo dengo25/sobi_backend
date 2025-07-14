@@ -12,7 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Slf4j
-//@Component
+@Component
 public class RedirectUrlCookieFilter extends OncePerRequestFilter {
 	
 	public static final String REDIRECT_URI_PARAM = "redirect_url";

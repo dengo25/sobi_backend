@@ -83,4 +83,9 @@ public class ReviewController {
     List<CategoryDTO> categories = categoryService.getAllCategories();
     return ResponseEntity.ok(categories);
   }
+  
+  @GetMapping("/health")
+  public String healthCheck() {
+    return "OK";
+  }
 }

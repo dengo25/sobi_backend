@@ -32,6 +32,7 @@ public class WebSecurityConfig {
   private final OAuthSuccessHandler oAuthSuccessHandler;
   private final RedirectUrlCookieFilter redirectUrlFilter;
   
+  
   public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter
       , OAuthSuccessHandler oAuthSuccessHandler
       , RedirectUrlCookieFilter redirectUrlFilter) {

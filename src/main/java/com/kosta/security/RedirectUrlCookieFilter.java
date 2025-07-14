@@ -30,7 +30,14 @@ public class RedirectUrlCookieFilter extends OncePerRequestFilter { //요청 당
 				log.info("request uri {} ", request.getRequestURI());
 				
 				String redirectUrl = request.getParameter(REDIRECT_URI_PARAM); //request uri 파라미터 가져오기
-
+				
+				log.info("redirect_url param: {}", redirectUrl);
+				
+				if (redirectUrl == null || redirectUrl.isBlank()) {
+					redirectUrl = "/";
+				}
+				
+				
 				// 쿠키 생성 및 설정
 				Cookie cookie = new Cookie(REDIRECT_URI_PARAM, redirectUrl); //쿠키 이름과 값 설정
 				cookie.setPath("/"); //전체 경로에서 쿠키 사용 가능 하도록 설정

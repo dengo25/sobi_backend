@@ -57,6 +57,10 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 																			Authentication authentication) throws IOException {
+		log.info("OAuth2 로그인 성공");
+		
+		log.info("request.getScheme() = {}", request.getScheme());
+		log.info("request.getHeader('X-Forwarded-Proto') = {}", request.getHeader("X-Forwarded-Proto"));
 		
 		TokenProvider tokenProvider = new TokenProvider();
 		String token = tokenProvider.create(authentication);

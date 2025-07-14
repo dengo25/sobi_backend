@@ -4,6 +4,7 @@ import com.kosta.security.JwtAuthenticationFilter;
 import com.kosta.security.OAuthSuccessHandler;
 import com.kosta.security.RedirectUrlCookieFilter;
 import com.kosta.security.service.CustomOAuth2UserService;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -133,8 +134,10 @@ public class WebSecurityConfig {
   
   //Spring Security와 Spring OAuth2가 X-Forwarded-Proto 값을 믿고 https로 처리함.
   @Bean
-  public ForwardedHeaderFilter forwardedHeaderFilter() {
-    return new ForwardedHeaderFilter();
+  FilterRegistrationBean<ForwardedHeaderFilter> forwardedHeaderFilter() {
+    FilterRegistrationBean<ForwardedHeaderFilter> bean = new FilterRegistrationBean<>();
+    bean.setFilter(new ForwardedHeaderFilter());
+    return bean;
   }
   
   

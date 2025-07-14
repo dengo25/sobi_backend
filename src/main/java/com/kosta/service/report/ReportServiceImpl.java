@@ -91,9 +91,6 @@ public class ReportServiceImpl implements ReportService {
         );
     }
     
-    /**
-     * 정렬 조건 생성 (ReportListDto 필드에 맞춰 검증)
-     */
     private Sort createSort(String sortBy, String sortDir) {
         // ReportListDto에 있는 필드만 정렬 허용
         if (!isValidSortField(sortBy)) {
@@ -119,10 +116,6 @@ public class ReportServiceImpl implements ReportService {
         );
     }
     
-    /**
-     * Report Entity를 ReportListDto로 변환
-     * Member 관계를 고려하여 memberId 추출
-     */
     private ReportListDto convertToListDto(Report report) {
         return ReportListDto.builder()
         	.reportId(report.getReportId())

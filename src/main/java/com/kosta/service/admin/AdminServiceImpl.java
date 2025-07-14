@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.kosta.domain.blacklist.Blacklist;
 import com.kosta.domain.blacklisthistory.BlacklistHistory;
 import com.kosta.domain.member.Member;
+import com.kosta.domain.report.Report;
 import com.kosta.domain.review.Review;
 import com.kosta.dto.admin.AdminMainPageDto;
 import com.kosta.dto.admin.MemberDetailDto;
@@ -53,7 +54,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public AdminMainPageDto getStatus() {
-        long totalMemberCount = adminRepository.countByRole("ROLE_USER");
+        long memberNotBlockedCount = adminRepository.countMemberNotBlocked();
         long blockedCount = blacklistRepository.countByStatus("BLOCKED");
         long reviewCount = adminReviewRepository.countByIsDeleted("N");
 
@@ -70,7 +71,7 @@ public class AdminServiceImpl implements AdminService {
         long unSolvedReportCount = reportRepository.countByStatus("PENDING");
 
         return AdminMainPageDto.builder()
-                .totalMemberCount(totalMemberCount)
+                .memberNotBlockedCount(memberNotBlockedCount)
                 .blockedCount(blockedCount)
                 .reviewCount(reviewCount)
                 .blacklistDto(blacklistDtos)
@@ -126,7 +127,18 @@ public class AdminServiceImpl implements AdminService {
                 .detail(detail)
                 .build();
         blacklistHistoryRepository.save(history);
+        
+        List<Report> pendingReports = reportRepository.findPendingReportsByTargetId(tno.intValue());
 
+        if (!pendingReports.isEmpty()) {
+            for (Report report : pendingReports) {
+                report.setStatus("PROCESSED");
+            }
+            reportRepository.saveAll(pendingReports);
+            log.info("리뷰 차단으로 인해 {}건의 신고가 처리완료로 변경되었습니다.", pendingReports.size());
+        }
+
+        adminReviewRepository.save(review);
         adminReviewRepository.save(review);
         return "리뷰 차단 및 블랙리스트 등록 완료";
     }

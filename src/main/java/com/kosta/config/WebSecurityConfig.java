@@ -82,6 +82,8 @@ public class WebSecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/notice").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/notice/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/notice/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/report/**").authenticated()
             .anyRequest().authenticated() //나머지 요청은 인증 필요
         )
         

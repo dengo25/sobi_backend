@@ -18,13 +18,13 @@ public interface BlacklistRepository extends JpaRepository<Blacklist, Integer> {
     @Query("SELECT b FROM Blacklist b JOIN FETCH b.member WHERE b.status = 'BLOCKED'")
     List<Blacklist> getBlockedMember();
     
-    // 🆕 특정 회원의 블랙리스트 상태 확인
-    Optional<Blacklist> findByMember(Member member);
+    // 특정 회원의 블랙리스트 상태 확인
+    Optional<Blacklist> findById(int blacklistNo);
     
-    // 🆕 특정 회원의 활성 블랙리스트 확인
+    // 특정 회원의 활성 블랙리스트 확인
     @Query("SELECT b FROM Blacklist b WHERE b.member = :member AND b.status = 'BLOCKED'")
     Optional<Blacklist> findActiveBlacklistByMember(@Param("member") Member member);
     
-    // 🆕 블랙리스트 존재 여부 확인
+    // 블랙리스트 존재 여부 확인
     boolean existsByMemberAndStatus(Member member, String status);
 }

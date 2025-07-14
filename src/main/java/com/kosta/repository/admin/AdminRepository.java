@@ -18,8 +18,9 @@ public interface AdminRepository extends JpaRepository<Member, Long> {
     
 	Member findByMemberId(String memberId);
 	
-    //role 사용자 수
-    long countByRole(String role);
+	@Query("SELECT COUNT(m) FROM Member m WHERE m.role = 'ROLE_USER' " +
+		       "AND m.memberId NOT IN (SELECT b.member.memberId FROM Blacklist b WHERE b.status = 'BLOCKED')")
+		long countMemberNotBlocked();
     
     @Query("SELECT new com.kosta.dto.admin.MemberListDto(" +
            "m.memberName, m.memberId, m.memberReg, " +

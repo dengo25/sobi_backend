@@ -20,6 +20,9 @@ public interface BlacklistRepository extends JpaRepository<Blacklist, Integer> {
     
     // 특정 회원의 블랙리스트 상태 확인
     Optional<Blacklist> findById(int blacklistNo);
+
+    Optional<Blacklist> findByMember(Member member);
+    
     
     // 특정 회원의 활성 블랙리스트 확인
     @Query("SELECT b FROM Blacklist b WHERE b.member = :member AND b.status = 'BLOCKED'")

@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnblockRequestDto {
-    private String reason;
+    private String detail;
 
 }

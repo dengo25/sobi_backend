@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProcessReportDto {
-    private String action;    // "APPROVE" or "REJECT"
-    private String reason;    // 처리 사유
+    private Long tno;
+    private String detail; 
 }

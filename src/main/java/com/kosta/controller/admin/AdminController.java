@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.kosta.config.AdminInitializer;
 import com.kosta.dto.admin.AdminMainPageDto;
 import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;
@@ -38,10 +38,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class AdminController {
+
+    private final AdminInitializer adminInitializer;
     
     private final AdminService adminService;
     private final ReviewService reviewService;
     private final ReportService reportService;
+
     
     @GetMapping("/review/{tno}")
     public ReviewDTO get(@PathVariable("tno") Long tno) {
@@ -150,7 +153,6 @@ public class AdminController {
         }
     }
     
-
     @GetMapping("/report")
     public ResponseEntity<ReportPageResponse> getReports(
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -187,21 +189,32 @@ public class AdminController {
         }
     }
 
-    @PutMapping("/report/{reportId}/process")
+    @PutMapping("/report/{reportId}")
     public ResponseEntity<String> processReport(
             @PathVariable int reportId,
-            @RequestBody ProcessReportDto processDto) {
-
+            @RequestBody ProcessReportDto requestDto ) {
         try {
-            reportService.processReport(reportId, processDto);
+        	log.info("신고 승인 요청 - reportId: {}, tno: {}, detail: {}",
+        			reportId, requestDto.getTno(), requestDto.getDetail());
+            String result = adminService.approveReport(reportId, requestDto.getTno(), requestDto.getDetail());
+            
+            return ResponseEntity.ok(result);
 
-            String action = "APPROVE".equals(processDto.getAction()) ? "승인" : "반려";
-            return ResponseEntity.ok("신고가 " + action + "되었습니다.");
-
-        } catch (RuntimeException e) {
-            log.error("신고 처리 오류 - ID: {}, 오류: {}", reportId, e.getMessage());
+        } catch (Exception e) {
+        	log.error("신고 승인 실패: ", e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    
+    @PatchMapping("/report/{reportId}")
+    public ResponseEntity<String> processReport(@PathVariable int reportId) {
+    	try {
+    		log.info("신고 반려 요청 - reportId: {}", reportId);
+    		String result = adminService.rejectReport(reportId);
+    		
+    		return ResponseEntity.ok(result);
+    	}catch(Exception e) {
+    		log.error("신고 반려 실패 - reportId: {}", reportId, e);
+    		return ResponseEntity.badRequest().body(e.getMessage());
+    	}
+    }
 }

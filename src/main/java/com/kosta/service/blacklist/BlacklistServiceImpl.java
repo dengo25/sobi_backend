@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.kosta.domain.blacklist.Blacklist;
 import com.kosta.domain.blacklisthistory.BlacklistHistory;
 import com.kosta.domain.member.Member;
-import com.kosta.dto.blacklist.BlacklistRequestDto;
 import com.kosta.repository.admin.AdminRepository;
 import com.kosta.repository.blacklist.BlacklistRepository;
 import com.kosta.repository.blacklisthistory.BlacklistHistoryRepository;
@@ -36,7 +35,7 @@ public class BlacklistServiceImpl implements BlacklistService {
     }
     
     @Override
-    public void removeFromBlacklist(int blacklistNo, String reason) {
+    public void removeFromBlacklist(int blacklistNo, String detail) {
     	Optional<Blacklist> blacklistOpt = blacklistRepository.findById(blacklistNo);
         if (blacklistOpt.isEmpty()) {
             throw new RuntimeException("해당 블랙리스트가 존재하지 않습니다.");
@@ -54,7 +53,7 @@ public class BlacklistServiceImpl implements BlacklistService {
         // 블랙리스트 해제 이력 추가
         BlacklistHistory history = BlacklistHistory.builder()
             .blacklist(blacklist)
-            .detail("블랙리스트 해제: " + reason)
+            .detail("블랙리스트 해제: " + detail)
             .reportType("UNBLOCK")
             .build();
         
@@ -64,7 +63,7 @@ public class BlacklistServiceImpl implements BlacklistService {
         member.setIsActive("Y");
         adminRepository.save(member);
         
-        log.info("블랙리스트 해제 완료 - 회원: {}, 사유: {}", member.getMemberId(), reason);
+        log.info("블랙리스트 해제 완료 - 회원: {}, 사유: {}", member.getMemberId(), detail);
     }
     
     @Override

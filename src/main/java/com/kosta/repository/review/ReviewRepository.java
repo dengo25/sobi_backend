@@ -28,8 +28,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewSea
   
   //Optional<Review> findById(Long rno);
   Optional<Review> findByRno(Long rno);
-
-
   
   // 특정 회원의 후기 조회 (최신순 정렬)
   @EntityGraph(attributePaths = {"member", "category"})

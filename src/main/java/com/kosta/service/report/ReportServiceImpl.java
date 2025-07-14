@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.kosta.domain.member.Member;
 import com.kosta.domain.report.Report;
-import com.kosta.dto.report.ProcessReportDto;
 import com.kosta.dto.report.ReportDto;
 import com.kosta.dto.report.ReportListDto;
 import com.kosta.dto.report.ReportSearchDto;
@@ -144,24 +143,5 @@ public class ReportServiceImpl implements ReportService {
             .status(report.getStatus())
             .createdAt(report.getCreatedAt())
             .build();
-    }
-
-    @Override
-    @Transactional
-    public void processReport(int reportId, ProcessReportDto processDto) {
-        Report report = reportRepository.findById(reportId)
-            .orElseThrow(() -> new RuntimeException("신고를 찾을 수 없습니다: " + reportId));
-        
-        if (!"PENDING".equals(report.getStatus())) {
-            throw new RuntimeException("이미 처리된 신고입니다.");
-        }
-        
-        // 상태 업데이트
-        String newStatus = "APPROVE".equals(processDto.getAction()) ? "PROCESSED" : "REJECTED";
-        report.setStatus(newStatus);
-        
-        reportRepository.save(report);
-        
-        log.info("신고 처리 완료 - ID: {}, 상태: {}", reportId, newStatus);
     }
 }

@@ -1,5 +1,6 @@
 package com.kosta.service.admin;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -108,17 +109,28 @@ public class AdminServiceImpl implements AdminService {
     public String blockReview(Long tno, String detail) {
         Optional<Review> result = adminReviewRepository.findById(tno);
         Review review = result.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
+        
         review.setConfirmed("B");
         review.setIsDeleted("Y");
 
         Member member = review.getMember();
-
-        // 블랙리스트 등록
-        Blacklist blacklist = Blacklist.builder()
-                .member(member)
-                .status("BLOCKED")
-                .build();
-        blacklistRepository.save(blacklist);
+        
+        Optional<Blacklist> blacklistResult = blacklistRepository.findByMember(member);
+        Blacklist blacklist = null;
+        
+        if(blacklistResult.isPresent()) {
+        	blacklist = blacklistResult.get();
+        	if(!"BLOCKED".equals(blacklist.getStatus())) {
+        		blacklist.setStatus("BLOCKED");
+        		blacklist.setUpdateAt(LocalDateTime.now());
+        	}else {
+        		blacklist = Blacklist.builder()
+        	               .member(member)
+        	               .status("BLOCKED")
+        	               .build();
+        	}
+        	blacklistRepository.save(blacklist);
+        }
 
         // 블랙리스트 히스토리 등록
         BlacklistHistory history = BlacklistHistory.builder()
@@ -128,18 +140,93 @@ public class AdminServiceImpl implements AdminService {
                 .build();
         blacklistHistoryRepository.save(history);
         
+        member.setIsActive("N");
+        adminRepository.save(member);
         List<Report> pendingReports = reportRepository.findPendingReportsByTargetId(tno.intValue());
 
         if (!pendingReports.isEmpty()) {
             for (Report report : pendingReports) {
-                report.setStatus("PROCESSED");
+                report.setStatus("APPROVE");
             }
             reportRepository.saveAll(pendingReports);
             log.info("리뷰 차단으로 인해 {}건의 신고가 처리완료로 변경되었습니다.", pendingReports.size());
         }
 
         adminReviewRepository.save(review);
-        adminReviewRepository.save(review);
+
         return "리뷰 차단 및 블랙리스트 등록 완료";
+    }
+    
+    @Override
+    public String approveReport(int reportId, Long tno, String detail) {
+    	Optional<Report> reportResult = reportRepository.findById(reportId);
+    	Report report = reportResult.orElseThrow(() -> new RuntimeException("신고내역이 존재하지 않습니다."));
+    	report.setStatus("APPROVE");
+    	
+    	Optional<Review> reviewResult = adminReviewRepository.findById(tno);
+    	Review review = reviewResult.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
+    	review.setIsDeleted("Y");
+    	review.setConfirmed("B");
+    	
+    	 Member member = review.getMember();
+         Optional<Blacklist> blacklistResult = blacklistRepository.findByMember(member);
+         Blacklist blacklist = null;
+         
+         if(blacklistResult.isPresent()) {
+         	blacklist = blacklistResult.get();
+         	if(!"BLOCKED".equals(blacklist.getStatus())) {
+         		blacklist.setStatus("BLOCKED");
+         		blacklist.setUpdateAt(LocalDateTime.now());
+         	}else {
+         		blacklist = Blacklist.builder()
+         	               .member(member)
+         	               .status("BLOCKED")
+         	               .build();
+         	}
+         	blacklistRepository.save(blacklist);
+         }
+
+         // 블랙리스트 히스토리 등록
+         BlacklistHistory history = BlacklistHistory.builder()
+                 .blacklist(blacklist)
+                 .reportType("BLOCK")
+                 .detail(detail)
+                 .build();
+         blacklistHistoryRepository.save(history);
+         
+         member.setIsActive("N");
+         adminRepository.save(member);
+
+         List<Report> pendingReports = reportRepository.findPendingReportsByTargetId(tno.intValue());
+
+         if (!pendingReports.isEmpty()) {
+             for (Report r: pendingReports) {
+                 r.setStatus("APPROVE");
+             }
+             reportRepository.saveAll(pendingReports);
+             log.info("리뷰 차단으로 인해 {}건의 신고가 처리완료로 변경되었습니다.", pendingReports.size());
+         }
+         
+         adminReviewRepository.save(review);
+         reportRepository.save(report);
+         
+    	return "신고 승인 및 리뷰 삭제 처리";
+    }
+    
+    
+    @Override 
+    public String rejectReport(int reportId) {
+    	Report report = reportRepository.findById(reportId)
+    			.orElseThrow(() -> new RuntimeException("신고내역이 존재하지 않습니다."));
+    	
+    	if(!"PENDING".equals(report.getStatus())) {
+    		throw new RuntimeException("이미 처리된 신고입니다. 현재 상태: " + report.getStatus());
+    	}
+    	report.setStatus("REJECT");
+    	
+    	reportRepository.save(report);
+    	
+    	log.info("신고 반려 완료 - reportId: {}", reportId);
+    	return "신고 반려 처리";
     }
 }

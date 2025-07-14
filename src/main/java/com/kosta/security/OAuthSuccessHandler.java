@@ -26,32 +26,69 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 	private static final String LOCAL_REDIRECT_URL = "https://sobi.thekosta.com";
 
 	//로그인 인증이 성공했을 때 호출되는 메서드
+//	@Override
+//	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+//			Authentication authentication) throws IOException {
+//
+//		TokenProvider tokenProvider = new TokenProvider(); //JWT 토큰 발급을 위한 객체 생성
+//		String token = tokenProvider.create(authentication); //인증 정보를 기반으로 JWT 토큰 생성
+//
+//		log.info("token {}", token);
+//
+//
+//		//요청에 포함된 쿠키 중 redirect_url 이름의 쿠키를 찾아 Optional로 매핑
+//		Optional<Cookie> oCookie = Arrays.stream(request.getCookies())
+//				.filter(cookie -> cookie.getName().equals(REDIRECT_URI_PARAM))
+//				.findFirst();
+//
+//		//쿠키가 존재하면 값 추출, 없으면 Optional.empty
+//		Optional<String> redirectUri = oCookie.map(Cookie::getValue);
+//
+//		log.info("redirectUri {}", redirectUri);
+//
+//		//쿠키 값이 존재하면 해당 값 사용, 없으면 기본 주소 사용 후 JWT 토큰을 쿼리 파라미터로 추가
+//		String targetUrl = redirectUri.orElseGet(() -> LOCAL_REDIRECT_URL) + "/sociallogin?token=" + token;
+//
+//		log.info("targetUrl {}", targetUrl);
+//
+//		response.sendRedirect(targetUrl);
+//	}
+	
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-			Authentication authentication) throws IOException {
+																			Authentication authentication) throws IOException {
 		
-		TokenProvider tokenProvider = new TokenProvider(); //JWT 토큰 발급을 위한 객체 생성
-		String token = tokenProvider.create(authentication); //인증 정보를 기반으로 JWT 토큰 생성
-
-		log.info("token {}", token);
+		TokenProvider tokenProvider = new TokenProvider();
+		String token = tokenProvider.create(authentication);
 		
+		log.info("Generated token: {}", token);
 		
-		//요청에 포함된 쿠키 중 redirect_url 이름의 쿠키를 찾아 Optional로 매핑
-		Optional<Cookie> oCookie = Arrays.stream(request.getCookies())
-				.filter(cookie -> cookie.getName().equals(REDIRECT_URI_PARAM))
-				.findFirst();
+		Optional<Cookie> oCookie = Optional.ofNullable(request.getCookies())
+				.flatMap(cookies -> Arrays.stream(cookies)
+						.filter(cookie -> cookie.getName().equals(REDIRECT_URI_PARAM))
+						.findFirst());
 		
-		//쿠키가 존재하면 값 추출, 없으면 Optional.empty
 		Optional<String> redirectUri = oCookie.map(Cookie::getValue);
-
-		log.info("redirectUri {}", redirectUri);
-
-		//쿠키 값이 존재하면 해당 값 사용, 없으면 기본 주소 사용 후 JWT 토큰을 쿼리 파라미터로 추가
-		String targetUrl = redirectUri.orElseGet(() -> LOCAL_REDIRECT_URL) + "/sociallogin?token=" + token;
-
-		log.info("targetUrl {}", targetUrl);
-
+		
+		if (oCookie.isPresent()) {
+			// 인증 후 쿠키 제거
+			Cookie remove = new Cookie(REDIRECT_URI_PARAM, null);
+			remove.setPath("/");
+			remove.setMaxAge(0);
+			response.addCookie(remove);
+		}
+		
+		String targetUrl = redirectUri
+				.map(uri -> uri + "?token=" + token)
+				.orElseGet(() -> {
+					log.warn("redirect_url 쿠키 없음 → 기본 주소로 리디렉트");
+					return LOCAL_REDIRECT_URL + "/sociallogin?token=" + token;
+				});
+		
+		log.info("Redirecting to: {}", targetUrl);
+		
 		response.sendRedirect(targetUrl);
 	}
-
+	
+	
 }

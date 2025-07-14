@@ -18,7 +18,6 @@ public class ReviewDTO {
   
   private String title;
   
-  
   private String content;
   
   private Long imageNumber;
@@ -31,11 +30,11 @@ public class ReviewDTO {
   
   private String confirmed;
   
-  // DTO를 만들 때 객체를 포함하지 않고 필요한 정보만 정의한다.
   private String memberId;
   
   private Long categoryId;
   
+  private CategoryDTO category;
   
   private List<ReviewImageDTO> images;
 }

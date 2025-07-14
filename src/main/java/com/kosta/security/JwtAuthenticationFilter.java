@@ -56,6 +56,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
+    //dev에서 추가
+    String requestURI = request.getRequestURI();
+    
+    if (requestURI.startsWith("/oauth2/") ||
+        requestURI.startsWith("/login/oauth2/") ||
+        requestURI.equals("/login")) {
+      log.info("OAuth2 경로 감지 - JWT 필터 건너뜀: {}", requestURI);
+      filterChain.doFilter(request, response);
+      return;
+    }
+    //dev에서 추가
+    
+    
     log.info("--------------JwtAuthenticationFilter---------------");
     log.info("Request URI: {}", request.getRequestURI());
     log.info("Authorization Header: {}", request.getHeader("Authorization"));

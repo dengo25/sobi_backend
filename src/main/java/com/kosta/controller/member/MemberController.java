@@ -4,6 +4,7 @@ import com.kosta.domain.member.Member;
 import com.kosta.dto.member.MemberDTO;
 import com.kosta.dto.member.ResponseDTO;
 import com.kosta.security.TokenProvider;
+import com.kosta.service.blacklist.BlacklistService;
 import com.kosta.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ public class MemberController {
   
   private final MemberService memberService;
   private final TokenProvider tokenProvider; //JWT토큰 생성 유틸
+  private final BlacklistService blacklistService;
   
   private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(); //비밀번호 암호화를 위한 인코더
   
@@ -30,7 +32,9 @@ public class MemberController {
       if (memberDTO == null || memberDTO.getPassword() == null) {
         throw new RuntimeException("Invalid Password value.");
       }
-      
+      if (blacklistService.isBlacklisted(memberDTO.getMemberName())) {
+          throw new RuntimeException("해당 계정은 이용이 제한되어 있습니다. 관리자에게 문의해주세요.");
+      }
       Member member = Member.builder()
           .memberId(memberDTO.getMemberId())
           .memberName(memberDTO.getMemberName())
@@ -63,28 +67,39 @@ public class MemberController {
   @PostMapping("/login")
   public ResponseEntity<?> authenticate(@RequestBody MemberDTO memberDTO) {
     log.info("로그인 요청: {}", memberDTO);
-    Member member = memberService.getByCredentials(memberDTO.getMemberId(), memberDTO.getPassword(), passwordEncoder);
-    
-    if (member != null) {
-      String token = tokenProvider.create(member);
-      
-      MemberDTO responseMemberDTO = memberDTO.builder()
-          .memberName(member.getMemberName())
-          .id(member.getId())
-          .memberId(member.getMemberId())
-          .memberEmail(member.getMemberEmail())
-          .token(token)
-          .role(member.getRole())
-          .build();
-      
-      log.info("로그인 응답 DTO: {}", responseMemberDTO);
-      return ResponseEntity.ok().body(responseMemberDTO);
-    }
-    else {
-      ResponseDTO responseDTO = ResponseDTO.builder()
-          .error("Login failed")
-          .build();
-      return ResponseEntity.badRequest().body(responseDTO);
-    }
+    try {
+        if (blacklistService.isBlacklisted(memberDTO.getMemberId())) {
+            throw new RuntimeException("해당 계정은 이용이 제한되어 있습니다. 관리자에게 문의해주세요.");
+        }
+        Member member = memberService.getByCredentials(memberDTO.getMemberId(), memberDTO.getPassword(), passwordEncoder);
+        
+        if (member != null) {
+          String token = tokenProvider.create(member);
+          
+          MemberDTO responseMemberDTO = memberDTO.builder()
+              .memberName(member.getMemberName())
+              .id(member.getId())
+              .memberId(member.getMemberId())
+              .memberEmail(member.getMemberEmail())
+              .token(token)
+              .role(member.getRole())
+              .build();
+          
+          log.info("로그인 응답 DTO: {}", responseMemberDTO);
+          return ResponseEntity.ok().body(responseMemberDTO);
+        }
+        else {
+          ResponseDTO responseDTO = ResponseDTO.builder()
+              .error("Login failed")
+              .build();
+          return ResponseEntity.badRequest().body(responseDTO);
+        }
+	} catch (Exception e) {
+        ResponseDTO responseDTO = ResponseDTO.builder()
+                .error(e.getMessage())
+                .build();
+            return ResponseEntity.badRequest().body(responseDTO);
+	}
+
   }
 }

@@ -53,6 +53,8 @@ public class WebSecurityConfig {
             .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
         )
         .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/health").permitAll()
+            
             // OAuth2 관련 경로들을 먼저 허용
             .requestMatchers("/oauth2/**", "/login/**", "/login/oauth2/**", "/error").permitAll()
             

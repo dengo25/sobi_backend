@@ -34,11 +34,15 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
   //OAuth2 로그인 시 사용자의 정보를 가져와서 CustomUser 객체로 반환하는 메서드
   @Override
   public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+    log.info("===> [1] OAuth2 로그인 진입: loadUser()");
+    
     try {
       log.info("loadUser");
       
       OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
       OAuth2User oAuth2User = delegate.loadUser(userRequest);
+      log.info("===> [2] OAuth2 attributes: {}", oAuth2User.getAttributes());
+      
       
       String registrationId = userRequest.getClientRegistration().getRegistrationId();
       String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails()

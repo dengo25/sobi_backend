@@ -67,8 +67,10 @@ public class WebSecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/faq/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/notice/**").permitAll()
-            .requestMatchers("/", "/auth/**","/api/review/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
-            .requestMatchers("/", "/auth/**","/api/review/**","/api/review/detail/**").permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
+            .requestMatchers(
+                "/", "/auth/**", "/api/review/**", "/api/review/detail/**",
+                "/oauth2/**", "/login", "/login/**", "/login/oauth2/**", "/error"
+            ).permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
             .requestMatchers("/error").permitAll() // 인증이 필요한 페이지에 비 인가 회원이 접근하였을경우 에러 표기
 
             // 인증이 필요한 경로들을 먼저 설정
@@ -114,7 +116,11 @@ public class WebSecurityConfig {
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowCredentials(true); //자격증명 포함 허용(ex: 쿠키, Authorication 헤더)
-    configuration.setAllowedOrigins(List.of("http://localhost:5173")); //허용할 프론트엔드 도메인
+    configuration.setAllowedOrigins(List.of(
+        "http://localhost:5173",
+        "http://sobi-front.s3-website.ap-northeast-2.amazonaws.com",
+        "https://final.thekosta.com",
+        "http://final.thekosta.com")); //허용할 프론트엔드 도메인
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")); //허용 메서드
     configuration.setAllowedHeaders(List.of("*")); //모든 요청 헤더 허용
     configuration.setExposedHeaders(List.of("*")); //응답 헤더 노출

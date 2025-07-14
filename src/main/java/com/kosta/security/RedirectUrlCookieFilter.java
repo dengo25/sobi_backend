@@ -27,7 +27,11 @@ public class RedirectUrlCookieFilter extends OncePerRequestFilter { //요청 당
 		// "/oauth2/authorization" 로 시작하는 요청이 들어오면 처리
 		if (request.getRequestURI().startsWith("/oauth2/authorization")) {
 			try {
-				log.info("request uri {} ", request.getRequestURI());
+				log.info("=== [RedirectUrlCookieFilter] 요청 감지 ===");
+				log.info("Request URI: {}", request.getRequestURI());
+				log.info("Query string: {}", request.getQueryString());
+				log.info("Full URL: {}?{}", request.getRequestURL(), request.getQueryString());
+				
 				
 				String redirectUrl = request.getParameter(REDIRECT_URI_PARAM); //request uri 파라미터 가져오기
 				

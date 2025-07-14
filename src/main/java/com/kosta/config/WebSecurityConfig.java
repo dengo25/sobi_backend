@@ -52,7 +52,10 @@ public class WebSecurityConfig {
   
   //보안 필터 체인 정의
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
+  SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService,
+      //dev에서 추가
+      ClientRegistrationRepository clientRegistrationRepository
+  ) throws Exception {
     http
         .cors(cors -> {}) //cors설정 활성화
         .csrf(csrf -> csrf.disable()) //csrf 비활성화 (restApi 서버에서 주로 사용)
@@ -97,6 +100,10 @@ public class WebSecurityConfig {
         
         //OAuth2 로그인 설정
         .oauth2Login(oauth2 -> oauth2
+            //dev에서 추가
+            .authorizationEndpoint(authorization ->
+                authorization.authorizationRequestResolver(authorizationRequestResolver(clientRegistrationRepository))
+            )
             .userInfoEndpoint(userInfo ->userInfo
                 .userService(customOAuth2UserService) //OAuth2 사용자 정보 로딩
             )

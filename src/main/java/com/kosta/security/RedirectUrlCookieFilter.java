@@ -13,59 +13,73 @@ import java.io.IOException;
 
 @Slf4j
 @Component
-//리디렉션 url을 쿠키에 저장하는 클래스
-public class RedirectUrlCookieFilter extends OncePerRequestFilter { //요청 당 한 번만 실행되는 커스텀 필터 클래스
-
-	public static final String REDIRECT_URI_PARAM = "redirect_url"; //요청 파라미터 및 쿠키 이름
-
-	private static final int MAX_AGE = 180; //쿠키 유효 시간 180초
-
+public class RedirectUrlCookieFilter extends OncePerRequestFilter {
+	
+	public static final String REDIRECT_URI_PARAM = "redirect_url";
+	private static final int MAX_AGE = 3000;
+	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-
-		// "/oauth2/authorization" 로 시작하는 요청이 들어오면 처리
+		
 		if (request.getRequestURI().startsWith("/oauth2/authorization")) {
 			try {
 				log.info("=== [RedirectUrlCookieFilter] 요청 감지 ===");
 				log.info("Request URI: {}", request.getRequestURI());
 				log.info("Query string: {}", request.getQueryString());
-				log.info("Full URL: {}?{}", request.getRequestURL(), request.getQueryString());
 				
-				// ✅ 여기 추가!
+				// 기존 쿠키 로깅
 				Cookie[] cookies = request.getCookies();
 				if (cookies != null) {
 					for (Cookie c : cookies) {
-						log.info("쿠키: {} = {}", c.getName(), c.getValue());
+						log.info("기존 쿠키: {} = {}", c.getName(), c.getValue());
 					}
 				}
-				String redirectUrl = request.getParameter(REDIRECT_URI_PARAM); //request uri 파라미터 가져오기
 				
+				String redirectUrl = request.getParameter(REDIRECT_URI_PARAM);
 				log.info("redirect_url param: {}", redirectUrl);
 				
 				if (redirectUrl == null || redirectUrl.isBlank()) {
-					redirectUrl = "/";
+					redirectUrl = "https://sobi.thekosta.com/review/list";
 				}
 				
+				// ✅ 커스텀 검증 메서드 사용
+				if (!isValidRedirectUrl(redirectUrl)) {
+					log.warn("유효하지 않은 redirect_url: {}", redirectUrl);
+					redirectUrl = "https://sobi.thekosta.com/dashboard";
+				}
 				
-				// 쿠키 생성 및 설정
-				Cookie cookie = new Cookie(REDIRECT_URI_PARAM, redirectUrl); //쿠키 이름과 값 설정
-				cookie.setPath("/"); //전체 경로에서 쿠키 사용 가능 하도록 설정
-				cookie.setHttpOnly(true); //자바 스크립트에서 접근 불가능하도록 설정 (보안 강화)
-				cookie.setMaxAge(MAX_AGE); //쿠키 만료시간
-				response.addCookie(cookie); //응답에 쿠키 추가
-
+				log.info("최종 redirect_url: {}", redirectUrl);
+				
+				// ✅ 헤더로만 설정 (Secure, SameSite 포함)
+				String cookieHeader = String.format(
+						"%s=%s; Path=/; HttpOnly; Secure; Max-Age=%d; SameSite=Lax",
+						REDIRECT_URI_PARAM, redirectUrl, MAX_AGE
+				);
+				response.addHeader("Set-Cookie", cookieHeader);
+				log.info("쿠키 설정: {}", cookieHeader);
+				
 			} catch (Exception ex) {
-				log.error("Could not set user authentication in security context", ex);
-				log.info("Unauthorized request");
+				log.error("RedirectUrlCookieFilter 에러", ex);
 			}
-
 		}
 		
-		
-		
-		
-		//다음 필터 체인으로 요청 전달
 		filterChain.doFilter(request, response);
+	}
+	
+	// ✅ 커스텀 검증 메서드
+	private boolean isValidRedirectUrl(String url) {
+		if (url == null || url.isBlank()) {
+			return false;
+		}
+		
+		String[] allowedDomains = {
+				"https://sobi.thekosta.com",
+				"http://localhost:3000",
+				"http://localhost:8080"
+		};
+		
+		return java.util.Arrays.stream(allowedDomains)
+				.anyMatch(domain -> url.startsWith(domain));
 	}
 }

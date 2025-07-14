@@ -62,7 +62,9 @@ public class WebSecurityConfig {
         .httpBasic(httpBasic -> httpBasic.disable()) //기본 인증 방식 비 활성화
         //basic 인증은 id와 비밀번호를 매 요청마다 헤더에 실어서 보내는 방식
         .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //세션 사용 안 함 (JWT기반 인증)
+//            .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //세션 사용 안 함 (JWT기반 인증)
+            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // 필요시 세션 생성
+        
         )
         .authorizeHttpRequests(auth -> auth
             // [요청 순서] permitAll() → 특정 권한 → anyRequest().authenticated()

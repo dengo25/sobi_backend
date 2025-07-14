@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
@@ -140,5 +142,18 @@ public class WebSecurityConfig {
     return bean;
   }
   
-  
+  // 추가: OAuth2 URL 생성 시 HTTPS 프로토콜 강제 적용
+  @Bean
+  public DefaultOAuth2AuthorizationRequestResolver authorizationRequestResolver(
+      ClientRegistrationRepository clientRegistrationRepository) {
+    DefaultOAuth2AuthorizationRequestResolver resolver =
+        new DefaultOAuth2AuthorizationRequestResolver(
+            clientRegistrationRepository, "/oauth2/authorization");
+    
+    resolver.setAuthorizationRequestCustomizer(customizer -> {
+      customizer.redirectUri("https://sobi.thekosta.com/login/oauth2/code/google");
+    });
+    
+    return resolver;
+  }
 }

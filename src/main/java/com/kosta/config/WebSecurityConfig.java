@@ -118,8 +118,7 @@ public class WebSecurityConfig {
     configuration.setAllowedOrigins(List.of(
         "http://localhost:5173",
         "http://sobi-front.s3-website.ap-northeast-2.amazonaws.com",
-        "https://final.thekosta.com",
-        "http://final.thekosta.com")); //허용할 프론트엔드 도메인
+        "https://sobi.thekosta.com")); //허용할 프론트엔드 도메인
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")); //허용 메서드
     configuration.setAllowedHeaders(List.of("*")); //모든 요청 헤더 허용
     configuration.setExposedHeaders(List.of("*")); //응답 헤더 노출

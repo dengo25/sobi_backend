@@ -25,7 +25,7 @@ public class RedirectUrlCookieFilter extends OncePerRequestFilter { //요청 당
 			throws ServletException, IOException {
 
 		// "/oauth2/authorization" 로 시작하는 요청이 들어오면 처리
-/*		if (request.getRequestURI().startsWith("/oauth2/authorization")) {
+		if (request.getRequestURI().startsWith("/oauth2/authorization")) {
 			try {
 				log.info("request uri {} ", request.getRequestURI());
 				
@@ -43,28 +43,11 @@ public class RedirectUrlCookieFilter extends OncePerRequestFilter { //요청 당
 				log.info("Unauthorized request");
 			}
 
-		}*/
-		
-		
-		
-		// 리디렉션 URL 저장 로직
-		if (request.getRequestURI().startsWith("/oauth2/authorization")) {
-			try {
-				log.info("request uri {} ", request.getRequestURI());
-				
-				String redirectUrl = request.getParameter(REDIRECT_URI_PARAM);
-				if (redirectUrl != null && !redirectUrl.isBlank()) {
-					String cookieValue = String.format(
-							"%s=%s; Path=/; Max-Age=%d; HttpOnly; Secure; SameSite=None",
-							REDIRECT_URI_PARAM, redirectUrl, MAX_AGE
-					);
-					response.setHeader("Set-Cookie", cookieValue);
-					log.info("Set-Cookie header: {}", cookieValue);
-				}
-			} catch (Exception ex) {
-				log.error("Could not set redirect_url cookie", ex);
-			}
 		}
+		
+		
+		
+		
 		//다음 필터 체인으로 요청 전달
 		filterChain.doFilter(request, response);
 	}

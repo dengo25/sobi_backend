@@ -30,17 +30,21 @@ public class WebSecurityConfig {
   
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final OAuthSuccessHandler oAuthSuccessHandler;
-  private final RedirectUrlCookieFilter redirectUrlFilter;
+//  private final RedirectUrlCookieFilter redirectUrlFilter;
+public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                         OAuthSuccessHandler oAuthSuccessHandler) {
+  this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+  this.oAuthSuccessHandler = oAuthSuccessHandler;
+}
   
-  
-  public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter
-      , OAuthSuccessHandler oAuthSuccessHandler
-      , RedirectUrlCookieFilter redirectUrlFilter) {
-    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    this.oAuthSuccessHandler = oAuthSuccessHandler;
-    this.redirectUrlFilter = redirectUrlFilter;
-  }
-  
+//  public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter
+//      , OAuthSuccessHandler oAuthSuccessHandler
+//      , RedirectUrlCookieFilter redirectUrlFilter) {
+//    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+//    this.oAuthSuccessHandler = oAuthSuccessHandler;
+//    this.redirectUrlFilter = redirectUrlFilter;
+//  }
+//
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService,
                                           ClientRegistrationRepository clientRegistrationRepository
@@ -100,7 +104,7 @@ public class WebSecurityConfig {
         )
         
         // 필터 순서 조정: OAuth2 관련 필터들을 JWT 필터보다 먼저 실행
-        .addFilterBefore(redirectUrlFilter, OAuth2AuthorizationRequestRedirectFilter.class)
+//        .addFilterBefore(redirectUrlFilter, OAuth2AuthorizationRequestRedirectFilter.class)
         .addFilterAfter(jwtAuthenticationFilter, OAuth2AuthorizationRequestRedirectFilter.class);
     
     return http.build();

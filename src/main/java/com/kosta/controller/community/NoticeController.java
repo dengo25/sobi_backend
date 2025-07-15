@@ -245,6 +245,13 @@ public class NoticeController {
 
 
 
+    // 메인 표출용 : 최신순(최근등록 순으로 상위 3개)
+    @GetMapping("/main")
+    public List<NoticeDTO> mainLimit3List (){
+        return noticeService.getMainNoticesByDate();
+    }
+
+
 
 
     // S3에서 이미지 삭제하는 메서드

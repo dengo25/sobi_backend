@@ -67,6 +67,9 @@ public interface NoticeRepository extends JpaRepository<Notice, Integer> {
     int countByIsVisibleAndNoticeTitleContainingIgnoreCaseOrNoticeContentContainingIgnoreCase(
             String isVisible, String noticeTitle, String noticeContent);
 
+
+    // 메인 표출용 : 최신순(최근등록 순으로 상위 3개)
+    List<Notice> findTop3ByIsVisibleOrderByNoticeCreateDateDesc(String isVisible);
 }
 
 

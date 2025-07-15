@@ -77,6 +77,8 @@ public class WebSecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/notice").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/notice/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/notice/**").hasRole("ADMIN")
+            .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            .requestMatchers("/api/report/**").authenticated()
             .anyRequest().authenticated()
         )
         

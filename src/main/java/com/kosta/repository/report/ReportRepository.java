@@ -48,12 +48,14 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     @Query("SELECT COUNT(r) FROM Report r WHERE r.reportType = :reportType")
     long countByReportType(@Param("reportType") String reportType);
     
-    
-
 	 //신고 상세 조회 (회원 정보 포함)
 	 @Query("SELECT r FROM Report r " +
 	        "JOIN FETCH r.reporterId " +
 	        "JOIN FETCH r.reportedId " +
 	        "WHERE r.reportId = :reportId")
 	 Optional<Report> findByIdWithMembers(@Param("reportId") int reportId);
+	 
+	 
+	 @Query("SELECT r FROM Report r WHERE r.targetId = :targetId AND r.status = 'PENDING'")
+	 List<Report> findPendingReportsByTargetId(@Param("targetId") int targetId);
 }

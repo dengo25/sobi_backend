@@ -11,9 +11,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AdminReviewRepository extends JpaRepository<Review, Long> {
 	
-	long countByIsDeleted(String isDeleted);
+	long count();
 	
-	long countByMemberAndIsDeleted(Member member, String isDeleted);
+	long countByMember(Member member);
 	
 	List<Review> findTop5ByMemberOrderByCreatedAtDesc(Member member);
+
 }

@@ -82,12 +82,15 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 			response.addCookie(remove);
 		}
 		
-		String targetUrl = redirectUri
+/*		String targetUrl = redirectUri
 				.map(uri -> uri + "?token=" + token)
 				.orElseGet(() -> {
 					log.warn("redirect_url 쿠키 없음 → 기본 주소로 리디렉트");
 					return LOCAL_REDIRECT_URL + "/sociallogin?token=" + token;
-				});
+				});*/
+		
+		String targetUrl = LOCAL_REDIRECT_URL + "/sociallogin?token=" + token;
+		
 		
 		log.info("Redirecting to: {}", targetUrl);
 		

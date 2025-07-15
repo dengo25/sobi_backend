@@ -18,8 +18,10 @@ public interface AdminRepository extends JpaRepository<Member, Long> {
     
 	Member findByMemberId(String memberId);
 	
-    //role 사용자 수
-    long countByRole(String role);
+	@Query("SELECT COUNT(m) FROM Member m WHERE m.role = 'ROLE_USER' " +
+			"AND m.isActive = 'Y' " +   
+			"AND m.memberId NOT IN (SELECT b.member.memberId FROM Blacklist b WHERE b.status = 'BLOCKED')")
+		long countMemberNotBlocked();
     
     @Query("SELECT new com.kosta.dto.admin.MemberListDto(" +
            "m.memberName, m.memberId, m.memberReg, " +
@@ -28,6 +30,7 @@ public interface AdminRepository extends JpaRepository<Member, Long> {
            "FROM Member m " +
            "LEFT JOIN Review r ON m.memberId = r.member.memberId AND r.isDeleted = 'N' " +
            "LEFT JOIN Report rep ON m.memberId = rep.reportedId.memberId " +
+           "AND m.memberId NOT IN (SELECT b.member.memberId FROM Blacklist b WHERE b.status = 'BLOCKED') " +
            "WHERE m.isActive = 'Y' AND m.role = 'ROLE_USER' " +
            "GROUP BY m.id, m.memberName, m.memberId, m.memberReg ")
     Page<MemberListDto> findActiveMembersWithCounts(Pageable pageable);

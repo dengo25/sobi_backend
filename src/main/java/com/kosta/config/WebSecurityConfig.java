@@ -81,18 +81,21 @@ public class WebSecurityConfig {
         	    ).permitAll()
         	    .requestMatchers("/error").permitAll()
 
-        	    // 인증이 필요한 경로들
-        	    .requestMatchers("/api/review/edit/**").authenticated()
-        	    .requestMatchers("/api/mypage/**").authenticated()
-        	    .requestMatchers("/api/messages/**").authenticated()
-        	    .requestMatchers(HttpMethod.POST, "/api/faq").hasRole("ADMIN")
-        	    .requestMatchers(HttpMethod.PUT, "/api/faq/**").hasRole("ADMIN")
-        	    .requestMatchers(HttpMethod.DELETE, "/api/faq/**").hasRole("ADMIN")
-        	    .requestMatchers(HttpMethod.POST, "/api/notice").hasRole("ADMIN")
-        	    .requestMatchers(HttpMethod.PUT, "/api/notice/**").hasRole("ADMIN")
-        	    .requestMatchers(HttpMethod.DELETE, "/api/notice/**").hasRole("ADMIN")
-        	    .anyRequest().authenticated()
-        	)
+            // 인증이 필요한 경로들을 먼저 설정
+            .requestMatchers("/api/review/edit/**").authenticated()
+            .requestMatchers("/api/review/my-reviews").authenticated() // 내가 쓴 후기 조회 인증 필요
+            .requestMatchers("/api/mypage/**").authenticated() // 마이페이지 인증 필요
+            .requestMatchers("/api/messages/**").authenticated() // 쪽지 기능 인증 필요
+            .requestMatchers(HttpMethod.POST, "/api/faq").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.PUT, "/api/faq/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/faq/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.POST, "/api/notice").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.PUT, "/api/notice/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/notice/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/report/**").authenticated()
+            .anyRequest().authenticated() //나머지 요청은 인증 필요
+        )
         
         //만든 jwtAuthenticationFilter를 UsernamePasswordAuthenticationFilter 이후에 실행되도록 추가
         .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

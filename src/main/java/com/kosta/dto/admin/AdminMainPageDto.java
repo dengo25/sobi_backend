@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class AdminMainPageDto {
-	private long totalMemberCount;
+	private long memberNotBlockedCount;
 	private long blockedCount;
 	private long reviewCount;
 	private List<BlacklistDto> blacklistDto;

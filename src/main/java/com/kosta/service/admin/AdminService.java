@@ -17,12 +17,14 @@ public interface AdminService {
     // 회원 리스트 조회 (페이징)
     Page<MemberListDto> getActiveMemberList(Pageable pageable);
     
-
 	String approveReview(Long tno);
 
 	String rejectReview(Long tno);
 
-	String blockReview(Long tno, String reason);
+	String blockReview(Long tno, String detail);
 
+	String approveReport(int reportId, Long tno, String detail);
+	
+	String rejectReport(int reportId);
 
 }

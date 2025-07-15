@@ -22,7 +22,6 @@ import com.kosta.repository.report.ReportRepository;
 
 import lombok.RequiredArgsConstructor;
 
-import com.kosta.dto.report.ReportDetailDto;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -126,22 +125,5 @@ public class ReportServiceImpl implements ReportService {
             .targetId(report.getTargetId())
             .build();
     }
-    @Override
-    public ReportDetailDto getReportDetail(int reportId) {
-        Report report = reportRepository.findByIdWithMembers(reportId)
-            .orElseThrow(() -> new RuntimeException("신고를 찾을 수 없습니다: " + reportId));
-        
-        return ReportDetailDto.builder()
-            .reportId(report.getReportId())
-            .reporterId(report.getReporterId().getMemberId())
-            .reporterName(report.getReporterId().getMemberName())
-            .reportedId(report.getReportedId().getMemberId())
-            .reportedName(report.getReportedId().getMemberName())
-            .reportType(report.getReportType())
-            .detail(report.getDetail())
-            .targetId(report.getTargetId())
-            .status(report.getStatus())
-            .createdAt(report.getCreatedAt())
-            .build();
-    }
+
 }

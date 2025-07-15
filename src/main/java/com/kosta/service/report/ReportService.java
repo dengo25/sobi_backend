@@ -11,5 +11,4 @@ public interface ReportService {
     
     public ReportPageResponse getReportsWithFiltersAndPaging(ReportSearchDto searchDto);
     
-    public ReportDetailDto getReportDetail(int reportId);
 }

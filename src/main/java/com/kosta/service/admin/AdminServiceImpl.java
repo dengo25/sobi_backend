@@ -16,7 +16,6 @@ import com.kosta.domain.member.Member;
 import com.kosta.domain.report.Report;
 import com.kosta.domain.review.Review;
 import com.kosta.dto.admin.AdminMainPageDto;
-import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;
 import com.kosta.repository.admin.AdminRepository;
 import com.kosta.repository.admin.AdminReviewRepository;
@@ -37,21 +36,7 @@ public class AdminServiceImpl implements AdminService {
     private final ReportRepository reportRepository;
     private final BlacklistRepository blacklistRepository;
     private final BlacklistHistoryRepository blacklistHistoryRepository;
-    
-    @Override
-    public MemberDetailDto getMember(String memberId) {
-        Member member = adminRepository.findByMemberId(memberId);
-        long memberReviewCount = adminReviewRepository.countByMember(member);
-        return MemberDetailDto.builder()
-                .memberName(member.getMemberName())
-                .memberId(member.getMemberId())
-                .memberGender(member.getMemberGender())
-                .memberEmail(member.getMemberEmail())
-                .memberAddr(member.getMemberAddr())
-                .memberReg(member.getMemberReg())
-                .memberReviewCount(memberReviewCount)
-                .build();
-    }
+
 
     @Override
     public AdminMainPageDto getStatus() {

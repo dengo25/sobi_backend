@@ -19,10 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kosta.config.AdminInitializer;
 import com.kosta.dto.admin.AdminMainPageDto;
-import com.kosta.dto.admin.MemberDetailDto;
 import com.kosta.dto.admin.MemberListDto;
 import com.kosta.dto.report.ProcessReportDto;
-import com.kosta.dto.report.ReportDetailDto;
 import com.kosta.dto.report.ReportPageResponse;
 import com.kosta.dto.report.ReportSearchDto;
 import com.kosta.dto.review.ReviewDTO;
@@ -102,10 +100,6 @@ public class AdminController {
         return ResponseEntity.ok(adminService.blockReview(tno, reason));
     }
     
-    @GetMapping("/member/{memberId}")
-    public ResponseEntity<MemberDetailDto> getMember(@PathVariable("memberId") String memberId) {
-        return ResponseEntity.ok(adminService.getMember(memberId));
-    }
     @GetMapping("/main")
     public ResponseEntity<AdminMainPageDto> adminStatus() {
     	AdminMainPageDto adminMainPageDto = adminService.getStatus();
@@ -177,16 +171,6 @@ public class AdminController {
 
         ReportPageResponse response = reportService.getReportsWithFiltersAndPaging(searchDto);
         return ResponseEntity.ok(response);
-    }
-    @GetMapping("/report/{reportId}")
-    public ResponseEntity<ReportDetailDto> getReportDetail(@PathVariable int reportId) {
-        try {
-            ReportDetailDto reportDetail = reportService.getReportDetail(reportId);
-            return ResponseEntity.ok(reportDetail);
-        } catch (RuntimeException e) {
-            log.error("신고 상세 조회 오류 - ID: {}, 오류: {}", reportId, e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @PutMapping("/report/{reportId}")

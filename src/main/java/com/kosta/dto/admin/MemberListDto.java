@@ -12,9 +12,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class MemberListDto {
 	private String memberName;
-	private String memberId;
-	private LocalDateTime memberReg;
-	private long memberReviewCount;
-	private long memberReportCount;
-
+	  private String memberId;
+	  private LocalDateTime memberReg;
+	  private String memberGender;
+	  private String memberEmail;
+	  private String memberAddr;
+	  private long memberReviewCount;
+	  private long memberReportCount;
 }

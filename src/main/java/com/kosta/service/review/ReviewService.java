@@ -17,7 +17,7 @@ import java.util.List;
 
 @Transactional
 public interface ReviewService {
-  
+	
   ReviewDTO get(Long rno);
   
   Long register(ReviewDTO dto);
@@ -25,9 +25,6 @@ public interface ReviewService {
   void update(ReviewDTO dto);
   
   void remove(Long rno);
-  
-  //관리자
-  Page<ReviewDTO> getReviewPage(Pageable pageable);
   
   PageResponseDTO<ReviewDTO> getList(PageRequestDTO pageRequestDTO);
   

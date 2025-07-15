@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kosta.config.AdminInitializer;
 import com.kosta.dto.admin.AdminMainPageDto;
 import com.kosta.dto.admin.MemberListDto;
+import com.kosta.dto.admin.ReviewPageResponse;
+import com.kosta.dto.admin.ReviewSearchDto;
 import com.kosta.dto.report.ProcessReportDto;
 import com.kosta.dto.report.ReportPageResponse;
 import com.kosta.dto.report.ReportSearchDto;
@@ -50,40 +52,32 @@ public class AdminController {
     }
     
     @GetMapping("/review/list")
-    public ResponseEntity<Page<ReviewDTO>> getReviewList(
+    public ResponseEntity<ReviewPageResponse> getReviewList(
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
-            @RequestParam(name = "sortDir", defaultValue = "desc") String sortDir) {
+            @RequestParam(name = "sortDir", defaultValue = "desc") String sortDir,
+            @RequestParam(name = "confirmed", required = false) String confirmed) {
         
-        log.info("리뷰 목록 조회 요청 - page: {}, size: {}, sortBy: {}, sortDir: {}",
-                page, size, sortBy, sortDir);
+        log.info("🔍 리뷰 목록 조회 요청 - page: {}, size: {}, sortBy: {}, sortDir: {}, confirmed: '{}'", 
+                page, size, sortBy, sortDir, confirmed);
         
-        try {
-            // 클라이언트는 1부터 시작하는 페이지를 사용하므로 -1
-            int adjustedPage = Math.max(0, page - 1);
-            
-            // 정렬 방향 설정
-            Sort.Direction sortDirection = sortDir.equalsIgnoreCase("desc") 
-                ? Sort.Direction.DESC : Sort.Direction.ASC;
-            
-            // 페이징 설정
-            Pageable pageable = PageRequest.of(adjustedPage, size, Sort.by(sortDirection, sortBy));
-            
-            // 리뷰 목록 조회
-            Page<ReviewDTO> reviewPage = reviewService.getReviewPage(pageable);
-            
-            log.info("리뷰 목록 조회 성공 - 총 {}개 리뷰, {}페이지", 
-                    reviewPage.getTotalElements(), reviewPage.getTotalPages());
-            
-            return ResponseEntity.ok(reviewPage);
-            
-        } catch (Exception e) {
-            log.error("리뷰 목록 조회 중 오류 발생", e);
-            return ResponseEntity.status(500).build();
-        }
+        // ReviewSearchDto 생성
+        ReviewSearchDto searchDto = new ReviewSearchDto();
+        searchDto.setPage(page);
+        searchDto.setSize(size);
+        searchDto.setSortBy(sortBy);
+        searchDto.setSortDir(sortDir);
+        searchDto.setConfirmed(confirmed);
+        
+        // AdminService 호출
+        ReviewPageResponse response = adminService.getReviewList(searchDto);
+        
+        log.info("✅ 리뷰 목록 조회 성공 - 총 {}개", response.getTotalElements());
+        
+        return ResponseEntity.ok(response);
     }
-    
+
     @PatchMapping("/review/{tno}/approve")
     public ResponseEntity<String> approveReview(@PathVariable Long tno) {
         return ResponseEntity.ok(adminService.approveReview(tno));

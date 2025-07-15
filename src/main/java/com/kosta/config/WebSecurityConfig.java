@@ -62,16 +62,24 @@ public class WebSecurityConfig {
             // 작성시 가장 구체적인 경로는 권한을 넘어서 가장 먼저 작성한다.
 
             // 인증이 필요하지 않은 경로들
-            .requestMatchers("/api/s3/presigned").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/faq").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/faq/**").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/notice/**").permitAll()
-            .requestMatchers(
-                "/", "/auth/**", "/api/review/**", "/api/review/detail/**",
-                "/oauth2/**", "/login", "/login/**", "/login/oauth2/**", "/error"
-            ).permitAll() //루트 및 /auth/** 경로는 인증 없이 허용
-            .requestMatchers("/error").permitAll() // 인증이 필요한 페이지에 비 인가 회원이 접근하였을경우 에러 표기
+        		.requestMatchers("/api/s3/presigned").permitAll()
+        	    .requestMatchers(HttpMethod.GET, "/api/faq").permitAll()
+        	    .requestMatchers(HttpMethod.GET, "/api/faq/**").permitAll()
+        	    .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
+        	    .requestMatchers(HttpMethod.GET, "/api/notice/**").permitAll()
+        	    
+        	 
+        	    .requestMatchers(HttpMethod.DELETE, "/api/review/**").authenticated() // 리뷰 삭제는 인증 필요
+        	    .requestMatchers(HttpMethod.PUT, "/api/review/**").authenticated()    // 리뷰 수정은 인증 필요
+        	    .requestMatchers(HttpMethod.POST, "/api/review").authenticated()      // 리뷰 작성은 인증 필요
+        	    .requestMatchers(HttpMethod.GET, "/api/review/my-reviews").authenticated() // 내 리뷰 조회는 인증 필요
+        	    .requestMatchers(HttpMethod.GET, "/api/review/**").permitAll()        // 리뷰 조회는 인증 불필요
+        	    
+        	    .requestMatchers(
+        	        "/", "/auth/**", "/oauth2/**", "/login", "/login/**", 
+        	        "/login/oauth2/**", "/error"
+        	    ).permitAll()
+        	    .requestMatchers("/error").permitAll()
 
             // 인증이 필요한 경로들을 먼저 설정
             .requestMatchers("/api/review/edit/**").authenticated()

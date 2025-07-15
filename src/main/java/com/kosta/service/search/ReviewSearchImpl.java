@@ -13,42 +13,56 @@ import java.util.List;
 @Log4j2
 public class ReviewSearchImpl extends QuerydslRepositorySupport implements ReviewSearch{
   public ReviewSearchImpl() {
-    
-    super(Review.class); //QuerydslRepositorySupport에 Review 엔티티를 넘겨서 기본 설정
+    super(Review.class);
   }
   
   @Override
   public Page<Review> search1(PageRequestDTO pageRequestDTO) {
     
-    log.info("search1..............."); //동작확인
+    log.info("search1 - pageRequestDTO: {}", pageRequestDTO);
     
-    QReview review = QReview.review; //쿼리를 날리기위한 객체(자동생성된 Q클래스)
+    QReview review = QReview.review;
     
-    //아래 상태에서 조건도, 페이징도 없다
-    JPQLQuery<Review> query = from(review); //상속을 받았기 때문에 from을 이용해서 뽑아낸다
-    query.leftJoin(review.images).fetchJoin();  // 이미지 연관
-    query.leftJoin(review.member).fetchJoin();  // 작성자 연관
-    query.select(review).distinct();            // 중복 제거
+    JPQLQuery<Review> query = from(review);
     
-    if (pageRequestDTO.getCategory() != null) {
+    query.leftJoin(review.images).fetchJoin();
+    query.leftJoin(review.member).fetchJoin();
+    query.leftJoin(review.category).fetchJoin(); 
+    query.select(review).distinct();
+    
+    query.where(review.isDeleted.ne("Y").or(review.isDeleted.isNull()));
+    
+    if (pageRequestDTO.getCategory() != null && pageRequestDTO.getCategory() > 0) {
+      log.info("카테고리 필터링 적용 - categoryId: {}", pageRequestDTO.getCategory());
       query.where(review.category.id.eq(pageRequestDTO.getCategory()));
     }
-  
     
-    //Spring Data의 PageRequest를 이용해서 페이징 정보생성
+    if (pageRequestDTO.getKeyword() != null && !pageRequestDTO.getKeyword().trim().isEmpty()) {
+      log.info("키워드 검색 적용 - keyword: {}", pageRequestDTO.getKeyword());
+      String keyword = "%" + pageRequestDTO.getKeyword().trim() + "%";
+      query.where(
+        review.title.likeIgnoreCase(keyword)
+        .or(review.content.likeIgnoreCase(keyword))
+      );
+    }
+    
+    Sort sort = Sort.by("rno").descending(); // 기본: 최신순
+    if ("oldest".equals(pageRequestDTO.getSort())) {
+      sort = Sort.by("rno").ascending(); // 오래된순
+    }
+    
     Pageable pageable = PageRequest.of(
         pageRequestDTO.getPage() - 1,
         pageRequestDTO.getSize(),
-        Sort.by("rno").descending());
+        sort
+    );
     
-    //위에서 만든 query에 적용
-    this.getQuerydsl().applyPagination(pageable, query); //pageable을 그대로 가져오고 쿼리문 그대로 처리
+    this.getQuerydsl().applyPagination(pageable, query);
     
-    List<Review> list = query.fetch(); //fetch를 이용해서 쿼리를 날린다. 목록 데이터를 가져올 때 쓴다.
+    List<Review> list = query.fetch();
+    long total = query.fetchCount();
     
-    //총 레코드 개수
-    long total = query.fetchCount(); //반환타입은 long으로 나온다.
-    
+    log.info("검색 결과 - total: {}, listSize: {}", total, list.size());
     
     return new PageImpl<>(list, pageable, total);
   }

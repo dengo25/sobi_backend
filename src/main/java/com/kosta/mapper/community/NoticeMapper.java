@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class NoticeMapper {
 
@@ -27,6 +29,13 @@ public class NoticeMapper {
     // Entity -> DTO
     public static NoticeDTO toDTO(Notice notice){
         if(notice == null) return null;
+
+        // 엔티티에 매핑된 noticeImages 컬렉션에서 URL만 추출
+        List<String> urls = notice.getNoticeImages() // OneToMany 관계
+                .stream()
+                .map(img -> img.getFileUrl())
+                .collect(Collectors.toList());
+
         return NoticeDTO.builder()
                 .noticeNo(notice.getNoticeNo())
                 .memberId(notice.getMember() != null ? notice.getMember().getMemberId() : null)
@@ -39,6 +48,7 @@ public class NoticeMapper {
                 .isDeleted(notice.getIsDeleted())
                 .isVisible(notice.getIsVisible())
                 .noticeImageNumber(notice.getNoticeImageNumber())
+                .imageUrls(urls) // img url 세팅 추가
                 .build();
     }
 

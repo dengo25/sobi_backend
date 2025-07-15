@@ -13,6 +13,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -101,5 +104,50 @@ public class MemberController {
             return ResponseEntity.badRequest().body(responseDTO);
 	}
 
+  }
+  
+  /**
+   * 이메일 중복 확인 API
+   * @param email 확인할 이메일 주소
+   * @return 사용 가능 여부와 메시지
+   */
+  @GetMapping("/check-email")
+  public ResponseEntity<?> checkEmailDuplicate(@RequestParam("email") String email) {
+    log.info("이메일 중복 확인 요청: {}", email);
+    
+    try {
+      // 이메일 형식 간단 검증
+      if (email == null || email.trim().isEmpty()) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("available", false);
+        response.put("message", "이메일을 입력해주세요.");
+        return ResponseEntity.badRequest().body(response);
+      }
+      
+      // 기본 이메일 형식 검증
+      if (!email.contains("@") || !email.contains(".")) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("available", false);
+        response.put("message", "올바른 이메일 형식이 아닙니다.");
+        return ResponseEntity.badRequest().body(response);
+      }
+      
+      boolean isAvailable = memberService.isEmailAvailable(email);
+      
+      Map<String, Object> response = new HashMap<>();
+      response.put("available", isAvailable);
+      response.put("message", isAvailable ? "사용 가능한 이메일입니다." : "이미 사용 중인 이메일입니다.");
+      
+      log.info("이메일 중복 확인 결과: {} - {}", email, isAvailable);
+      return ResponseEntity.ok().body(response);
+      
+    } catch (Exception e) {
+      log.error("이메일 중복 확인 중 오류 발생: {}", e.getMessage(), e);
+      
+      Map<String, Object> response = new HashMap<>();
+      response.put("available", false);
+      response.put("message", "이메일 확인 중 오류가 발생했습니다.");
+      return ResponseEntity.status(500).body(response);
+    }
   }
 }

@@ -352,6 +352,16 @@ public class NoticeServiceImpl extends GenericServiceImpl<Notice, NoticeDTO, Int
     }
 
 
+    public List<NoticeDTO> getMainNoticesByDate(){
+        List<Notice> list = noticeRepository.findTop3ByIsVisibleOrderByNoticeCreateDateDesc("Y");
+        return list.stream()
+                .map(NoticeMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+
+
+
     @Transactional
     public void incrementViewCount(int noticeNo) {
         int updatedRows = noticeRepository.incrementViewCount(noticeNo);

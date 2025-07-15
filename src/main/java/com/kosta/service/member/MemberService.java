@@ -91,4 +91,25 @@ public class MemberService {
     
     log.info("논리적 삭제 완료: memberId = {}", member.getMemberId());
   }
+  
+  /**
+   * 이메일 사용 가능 여부 확인
+   * @param email 확인할 이메일 주소
+   * @return true: 사용 가능, false: 이미 사용 중
+   */
+  public boolean isEmailAvailable(String email) {
+    try {
+      log.info("이메일 중복 확인: {}", email);
+      
+      // 활성 회원 중에서 해당 이메일이 존재하는지 확인
+      boolean exists = memberRepository.existsByMemberEmailAndIsActive(email, "Y");
+      
+      log.info("이메일 {} 사용 가능 여부: {}", email, !exists);
+      return !exists; // 존재하지 않으면 사용 가능
+      
+    } catch (Exception e) {
+      log.error("이메일 중복 확인 중 데이터베이스 오류 발생: {}", e.getMessage(), e);
+      throw new RuntimeException("이메일 중복 확인 중 오류가 발생했습니다.", e);
+    }
+  }
 }

@@ -21,4 +21,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByMemberIdAndIsActive(String memberId, String isActive);
     
     Optional<Member> findByIdAndIsActive(Long id, String isActive);
+    
+    // 이메일 중복 확인을 위한 메서드 추가
+    boolean existsByMemberEmailAndIsActive(String memberEmail, String isActive);
+    
+    // 이메일로 회원 조회 (활성 사용자만)
+    Optional<Member> findByMemberEmailAndIsActive(String memberEmail, String isActive);
 }

@@ -35,4 +35,7 @@ public interface NoticeService extends GenericService<Notice, NoticeDTO> {
     // 카운트 관련 메서드
     int getTotalNoticeCount();
     int getSearchNoticeCount(String searchType, String keyword);
+
+    // 메인 표출용 : 최신순(최근등록 순으로 상위 3개)
+    List<NoticeDTO> getMainNoticesByDate();
 }

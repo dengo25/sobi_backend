@@ -40,18 +40,18 @@ public class RedirectUrlCookieFilter extends OncePerRequestFilter {
 				log.info("redirect_url param: {}", redirectUrl);
 				
 				if (redirectUrl == null || redirectUrl.isBlank()) {
-					redirectUrl = "https://sobi.thekosta.com/review/list";
+					redirectUrl = "https://sobi.thekosta.com/sociallogin";
 				}
 				
-				// ✅ 커스텀 검증 메서드 사용
+				//  커스텀 검증 메서드 사용
 				if (!isValidRedirectUrl(redirectUrl)) {
 					log.warn("유효하지 않은 redirect_url: {}", redirectUrl);
-					redirectUrl = "https://sobi.thekosta.com/dashboard";
+					redirectUrl = "https://sobi.thekosta.com/sociallogin";
 				}
 				
 				log.info("최종 redirect_url: {}", redirectUrl);
 				
-				// ✅ 헤더로만 설정 (Secure, SameSite 포함)
+				//  헤더로만 설정 (Secure, SameSite 포함)
 				String cookieHeader = String.format(
 						"%s=%s; Path=/; HttpOnly; Secure; Max-Age=%d; SameSite=Lax",
 						REDIRECT_URI_PARAM, redirectUrl, MAX_AGE

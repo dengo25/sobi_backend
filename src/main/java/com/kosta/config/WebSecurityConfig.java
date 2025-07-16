@@ -4,6 +4,7 @@ import com.kosta.security.JwtAuthenticationFilter;
 import com.kosta.security.OAuthSuccessHandler;
 import com.kosta.security.RedirectUrlCookieFilter;
 import com.kosta.security.service.CustomOAuth2UserService;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,6 +12,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
@@ -18,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
 import java.util.List;
 
@@ -26,18 +30,10 @@ import java.util.List;
 @EnableMethodSecurity
 public class WebSecurityConfig {
   
-  /*  final 키워드는 불편객체로 설정
-    JwtAuthenticationFilter는 우리가 만든 jwt 기반 인증 필터이고, 이 필터를 스프링 시큐리티 필터체인에 추가하기 위해
-    생성자 주입 방식으로 WebSecurityConfig에 전달하는 방식
-  */
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
   private final OAuthSuccessHandler oAuthSuccessHandler;
-  
-  //리다이렉트 url정보를 쿠키에 저장하는 필터
   private final RedirectUrlCookieFilter redirectUrlFilter;
   
-  //필터체인에 등록하려면 JwtAuthenticationFilter에서 이 객체를 사용할 수 있어야하기 때문에 생성자 주입방식 사용
   public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter
       , OAuthSuccessHandler oAuthSuccessHandler
       , RedirectUrlCookieFilter redirectUrlFilter) {
@@ -46,98 +42,93 @@ public class WebSecurityConfig {
     this.redirectUrlFilter = redirectUrlFilter;
   }
   
-  //보안 필터 체인 정의
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
+  SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService,
+                                          ClientRegistrationRepository clientRegistrationRepository
+  ) throws Exception {
     http
-        .cors(cors -> {}) //cors설정 활성화
-        .csrf(csrf -> csrf.disable()) //csrf 비활성화 (restApi 서버에서 주로 사용)
-        .httpBasic(httpBasic -> httpBasic.disable()) //기본 인증 방식 비 활성화
-        //basic 인증은 id와 비밀번호를 매 요청마다 헤더에 실어서 보내는 방식
+        .cors(cors -> {})
+        .csrf(csrf -> csrf.disable())
+        .httpBasic(httpBasic -> httpBasic.disable())
         .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //세션 사용 안 함 (JWT기반 인증)
+            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
         )
         .authorizeHttpRequests(auth -> auth
-            // [요청 순서] permitAll() → 특정 권한 → anyRequest().authenticated()
-            // 작성시 가장 구체적인 경로는 권한을 넘어서 가장 먼저 작성한다.
-
-            // 인증이 필요하지 않은 경로들
-        		.requestMatchers("/api/s3/presigned").permitAll()
-        	    .requestMatchers(HttpMethod.GET, "/api/faq").permitAll()
-        	    .requestMatchers(HttpMethod.GET, "/api/faq/**").permitAll()
-        	    .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
-        	    .requestMatchers(HttpMethod.GET, "/api/notice/**").permitAll()
-        	    
-        	 
-        	    .requestMatchers(HttpMethod.DELETE, "/api/review/**").authenticated() // 리뷰 삭제는 인증 필요
-        	    .requestMatchers(HttpMethod.PUT, "/api/review/**").authenticated()    // 리뷰 수정은 인증 필요
-        	    .requestMatchers(HttpMethod.POST, "/api/review").authenticated()      // 리뷰 작성은 인증 필요
-        	    .requestMatchers(HttpMethod.GET, "/api/review/my-reviews").authenticated() // 내 리뷰 조회는 인증 필요
-        	    .requestMatchers(HttpMethod.GET, "/api/review/**").permitAll()        // 리뷰 조회는 인증 불필요
-        	    
-        	    .requestMatchers(
-        	        "/", "/auth/**", "/oauth2/**", "/login", "/login/**", 
-        	        "/login/oauth2/**", "/error"
-        	    ).permitAll()
-        	    .requestMatchers("/error").permitAll()
-
-            // 인증이 필요한 경로들을 먼저 설정
+            // OAuth2 관련 경로들을 먼저 허용
+            .requestMatchers("/oauth2/**", "/login/**", "/login/oauth2/**", "/error","/api/health").permitAll()
+            
+            // 기타 public 경로들
+            .requestMatchers("/api/s3/presigned").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/faq").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/faq/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/notice").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/notice/**").permitAll()
+            .requestMatchers("/", "/auth/**","/api/review/**").permitAll()
+            .requestMatchers("/api/review/detail/**").permitAll()
+            
+            // 인증이 필요한 경로들
             .requestMatchers("/api/review/edit/**").authenticated()
-            .requestMatchers("/api/review/my-reviews").authenticated() // 내가 쓴 후기 조회 인증 필요
-            .requestMatchers("/api/mypage/**").authenticated() // 마이페이지 인증 필요
-            .requestMatchers("/api/messages/**").authenticated() // 쪽지 기능 인증 필요
+            .requestMatchers("/api/review/my-reviews").authenticated()
+            .requestMatchers("/api/mypage/**").authenticated()
+            .requestMatchers("/api/messages/**").authenticated()
             .requestMatchers(HttpMethod.POST, "/api/faq").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/faq/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/faq/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.POST, "/api/notice").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/notice/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/notice/**").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.DELETE, "/api/report/**").authenticated()
-            .anyRequest().authenticated() //나머지 요청은 인증 필요
+            .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            .requestMatchers("/api/report/**").authenticated()
+            .anyRequest().authenticated()
         )
         
-        //만든 jwtAuthenticationFilter를 UsernamePasswordAuthenticationFilter 이후에 실행되도록 추가
-        .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-        
-        //OAuth2 로그인 설정
+        // OAuth2 로그인 설정 (authorizationRequestCustomizer 제거!)
         .oauth2Login(oauth2 -> oauth2
-            .userInfoEndpoint(userInfo ->userInfo
-                .userService(customOAuth2UserService) //OAuth2 사용자 정보 로딩
+            .userInfoEndpoint(userInfo -> userInfo
+                .userService(customOAuth2UserService)
             )
             .successHandler(oAuthSuccessHandler)
+            .failureHandler((request, response, exception) -> {
+              System.out.println("=== OAuth2 로그인 실패 ===");
+              System.out.println("오류: " + exception.getMessage());
+              exception.printStackTrace();
+              response.sendRedirect("/login?error=" + exception.getMessage());
+            })
         )
         
         .exceptionHandling(exception -> exception
-            //인증 실패 시 403 Forbidden 반환
             .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
         )
         
-        //리다이렉트 url 쿠키필터를 OAuth2 리다이렉트 필터 이전에 실행
-        .addFilterBefore(redirectUrlFilter, OAuth2AuthorizationRequestRedirectFilter.class);
+        // 필터 순서 조정: OAuth2 관련 필터들을 JWT 필터보다 먼저 실행
+        .addFilterBefore(redirectUrlFilter, OAuth2AuthorizationRequestRedirectFilter.class)
+        .addFilterAfter(jwtAuthenticationFilter, OAuth2AuthorizationRequestRedirectFilter.class);
     
     return http.build();
   }
   
-  // CORS 설정을 담당하는 메서드
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowCredentials(true); //자격증명 포함 허용(ex: 쿠키, Authorication 헤더)
+    configuration.setAllowCredentials(true);
     configuration.setAllowedOrigins(List.of(
         "http://localhost:5173",
         "http://sobi-front.s3-website.ap-northeast-2.amazonaws.com",
-        "https://final.thekosta.com",
-        "http://final.thekosta.com")); //허용할 프론트엔드 도메인
-    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")); //허용 메서드
-    configuration.setAllowedHeaders(List.of("*")); //모든 요청 헤더 허용
-    configuration.setExposedHeaders(List.of("*")); //응답 헤더 노출
+        "https://sobi.thekosta.com"));
+    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+    configuration.setAllowedHeaders(List.of("*"));
+    configuration.setExposedHeaders(List.of("*"));
     
-    
-    // 위의 CORS 설정을 모든 경로에 적용
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration); //모든 요청에 대해 설정 적용
+    source.registerCorsConfiguration("/**", configuration);
     return source;
   }
   
+  @Bean
+  FilterRegistrationBean<ForwardedHeaderFilter> forwardedHeaderFilter() {
+    FilterRegistrationBean<ForwardedHeaderFilter> bean = new FilterRegistrationBean<>();
+    bean.setFilter(new ForwardedHeaderFilter());
+    return bean;
+  }
+
 }

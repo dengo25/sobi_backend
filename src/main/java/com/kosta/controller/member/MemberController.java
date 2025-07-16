@@ -35,7 +35,7 @@ public class MemberController {
       if (memberDTO == null || memberDTO.getPassword() == null) {
         throw new RuntimeException("Invalid Password value.");
       }
-      if (blacklistService.isBlacklisted(memberDTO.getMemberName())) {
+      if (blacklistService.isBlacklisted(memberDTO.getMemberId())) {
           throw new RuntimeException("해당 계정은 이용이 제한되어 있습니다. 관리자에게 문의해주세요.");
       }
       Member member = Member.builder()

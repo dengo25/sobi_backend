@@ -55,7 +55,7 @@ public class WebSecurityConfig {
         )
         .authorizeHttpRequests(auth -> auth
             // OAuth2 관련 경로들을 먼저 허용
-            .requestMatchers("/oauth2/**", "/login/**", "/login/oauth2/**", "/error","/api/health").permitAll()
+            .requestMatchers("/oauth2/**", "/login/**", "/login/oauth2/**", "/error","/api/health","/api/category").permitAll()
             
             // 기타 public 경로들
             .requestMatchers("/api/s3/presigned").permitAll()

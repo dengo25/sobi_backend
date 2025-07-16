@@ -18,6 +18,7 @@ public class ReportListDto {
 	private String reportedId;
 	private String reportType;
 	private String status;
+	private String detail;
 	private LocalDateTime createdAt;
 	private int targetId;
 	

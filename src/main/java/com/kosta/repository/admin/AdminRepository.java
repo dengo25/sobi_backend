@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.kosta.domain.member.Member;
+import com.kosta.domain.review.Review;
 import com.kosta.dto.admin.MemberListDto;
 
 

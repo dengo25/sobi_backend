@@ -48,14 +48,6 @@ public class ReportServiceImpl implements ReportService {
         reportRepository.save(report);
     }
     
-    @Override
-    public List<ReportListDto> getReportList(String status, String type) {
-        // 기존 메서드 구현 (페이징 없이)
-        List<Report> reports = reportRepository.findByStatusAndType(status, type);
-        return reports.stream()
-                .map(this::convertToListDto)
-                .collect(Collectors.toList());
-    }
     
     @Override
     public ReportPageResponse getReportsWithFiltersAndPaging(ReportSearchDto searchDto) {
@@ -101,9 +93,6 @@ public class ReportServiceImpl implements ReportService {
         return Sort.by(direction, sortBy);
     }
     
-    /**
-     * 유효한 정렬 필드인지 검증
-     */
     private boolean isValidSortField(String sortBy) {
         return sortBy != null && (
             "reporterId".equals(sortBy) ||
@@ -121,6 +110,7 @@ public class ReportServiceImpl implements ReportService {
             .reportedId(report.getReportedId().getMemberId())  // Member에서 ID 추출
             .reportType(report.getReportType())
             .status(report.getStatus())
+            .detail(report.getDetail())
             .createdAt(report.getCreatedAt())
             .targetId(report.getTargetId())
             .build();
